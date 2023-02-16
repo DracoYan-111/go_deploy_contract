@@ -2,7 +2,11 @@ module GoContractDeployment
 
 go 1.19
 
-require github.com/ethereum/go-ethereum v1.10.26
+require (
+	github.com/ethereum/go-ethereum v1.10.26
+	github.com/go-chi/chi v1.5.4
+	github.com/go-sql-driver/mysql v1.7.0
+)
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect

@@ -21,7 +21,7 @@ type Structure struct {
 	TokenURIPrefix string
 }
 
-// 创建合约并返回合约地址
+// GoContractDeployment 创建合约并返回合约地址
 func GoContractDeployment(structure Structure, t *testing.T) string {
 	auth, client := GoCreateConnection(t)
 
@@ -40,7 +40,7 @@ func GoContractDeployment(structure Structure, t *testing.T) string {
 	return address.Hex()
 }
 
-// createConnection
+// GoCreateConnection createConnection
 func GoCreateConnection(t *testing.T) (*bind.TransactOpts, *ethclient.Client) {
 
 	// Connect to node
