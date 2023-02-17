@@ -1,7 +1,7 @@
 package deploy
 
 import (
-	box721 "GoContractDeployment/pkg"
+	"GoContractDeployment/pkg/box721"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"

@@ -1,7 +1,7 @@
 package deploy
 
 import (
-	box721 "GoContractDeployment/pkg"
+	"GoContractDeployment/pkg/box721"
 	"context"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"

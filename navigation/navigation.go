@@ -28,16 +28,20 @@ func ConnectSQL(host, port, pass, dbname string) (*DB, error) {
 	println(dbSource)
 
 	// 连接到数据库
-	db, err := sql.Open("mysql", dbSource)
+	dbData, err := sql.Open("mysql", dbSource)
 	if err != nil {
 		log.Fatal("====数据库连接异常====", err)
+	} else {
+		log.Println("++++数据库连接成功++++")
 	}
 
 	// 检查数据库连接
-	if err = db.Ping(); err != nil {
+	if err = dbData.Ping(); err != nil {
 		log.Fatal("====数据库检查未通过====", err)
+	} else {
+		log.Println("++++数据库检查通过++++")
 	}
 
-	dbConn.SQL = db
+	dbConn.SQL = dbData
 	return dbConn, err
 }
