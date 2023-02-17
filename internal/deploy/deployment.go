@@ -3,12 +3,15 @@ package deploy
 import (
 	"GoContractDeployment/pkg/box721"
 	"context"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"log"
 	"math/big"
 	"testing"
+	"time"
 )
 
 const RpcUrl = "http://127.0.0.1:8545/"
@@ -23,9 +26,9 @@ type Structure struct {
 
 // GoContractDeployment 创建合约并返回合约地址
 func GoContractDeployment(structure Structure, t *testing.T) string {
-	auth, client := GoCreateConnection(t)
+	auth, client := GoCreateConnection("https://data-seed-prebsc-1-s1.binance.org:8545/", t)
 
-	address, _, _, err := box721.DeployBox721(
+	address, txData, _, err := box721.DeployBox721(
 		auth,
 		client,
 		structure.Name,
@@ -34,19 +37,56 @@ func GoContractDeployment(structure Structure, t *testing.T) string {
 		structure.TokenURIPrefix,
 	)
 
-	if err == nil {
-		t.Log("最新nonce异常合约创建完成", address.Hex())
+	if err != nil {
+		t.Log("创建合约异常", address.Hex())
 	}
+	t.Log("开始等待", txData.Hash().Hex())
+	time.Sleep(5 * time.Second)
 	return address.Hex()
 }
 
-// GoCreateConnection createConnection
-func GoCreateConnection(t *testing.T) (*bind.TransactOpts, *ethclient.Client) {
+// GoTransactionNews 查询使用的gas
+func GoTransactionNews(client *ethclient.Client, hash string, t *testing.T) uint64 {
+	txHash := common.HexToHash(hash)
 
-	// Connect to node
-	client, err := ethclient.Dial(RpcUrl)
+	// 获取交易
+	_, isPending, err := client.TransactionByHash(context.Background(), txHash)
 	if err != nil {
-		t.Log("连接到节点异常", err)
+		log.Fatal(err)
+	}
+
+	// 如果交易未被打包，等待它被打包
+	if isPending {
+		log.Fatal("Transaction is pending")
+	}
+
+	// 获取交易所使用的gas数量
+	receipt, err := client.TransactionReceipt(context.Background(), txHash)
+	if err != nil {
+		log.Fatal(err)
+	}
+	t.Log(receipt.GasUsed)
+	return receipt.GasUsed
+}
+
+// GoCreateConnection createConnection
+func GoCreateConnection(url string, t *testing.T) (*bind.TransactOpts, *ethclient.Client) {
+	var client *ethclient.Client
+	var err error
+	if len(url) > 0 {
+		// Connect to node
+		fmt.Println("000000000000000000000000000000")
+		client, err = ethclient.Dial(url)
+		if err != nil {
+			t.Log("连接到节点异常", err)
+		}
+	} else {
+		fmt.Println("11111111111111111111111111111111")
+		// Connect to node
+		client, err = ethclient.Dial(RpcUrl)
+		if err != nil {
+			t.Log("连接到节点异常", err)
+		}
 	}
 
 	// Create private key instance
@@ -75,8 +115,8 @@ func GoCreateConnection(t *testing.T) (*bind.TransactOpts, *ethclient.Client) {
 	}
 
 	auth.Nonce = big.NewInt(int64(nonce))
-	auth.Value = big.NewInt(0)       // in wei
-	auth.GasLimit = uint64(30000000) // in units
+	auth.Value = big.NewInt(0)      // in wei
+	auth.GasLimit = uint64(6000000) // in units
 	auth.GasPrice = gasPrice
 
 	return auth, client

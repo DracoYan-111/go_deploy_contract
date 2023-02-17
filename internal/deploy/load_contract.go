@@ -10,7 +10,7 @@ import (
 
 // GoInteractiveContract 交互合约
 func GoInteractiveContract(contract *box721.Box721, t *testing.T) {
-	auth, _ := GoCreateConnection(t)
+	auth, _ := GoCreateConnection("", t)
 	tx, err := contract.Erc721Mint(auth, big.NewInt(0), common.HexToAddress("0x0000000000000000000000000000000000000001"), "")
 	if err != nil {
 		t.Log("发起交易异常", err)
@@ -40,7 +40,7 @@ func GoCreateAndGenerate(structure Structure, t *testing.T) *box721.Box721 {
 
 // GoLoadWithAddress 通过地址生成合约实例
 func GoLoadWithAddress(contractAddr string, t *testing.T) *box721.Box721 {
-	_, client := GoCreateConnection(t)
+	_, client := GoCreateConnection("", t)
 
 	instance, err := box721.NewBox721(common.HexToAddress(contractAddr), client)
 	if err != nil {

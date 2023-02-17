@@ -16,6 +16,13 @@ func TestDeploy(t *testing.T) {
 			TokenURIPrefix: "test",
 		}
 	fmt.Print(stream)
+	//
+	//amount := big.NewInt(1e18)
+	//usdtAmount := internal.GetBnbToUsdt(amount, t)
+	//
+	//log.Printf(usdtAmount)
 
-	deploy.GoCreateAndGenerate(stream, t)
+	a := deploy.GoContractDeployment(stream, t)
+
+	t.Log(a)
 }

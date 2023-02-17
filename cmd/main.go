@@ -49,10 +49,9 @@ func main() {
 	}
 }
 
-// 一个完全独立的帖子路由路由器
+// postRouter 一个完全独立的路由器
 func postRouter(pHandler *phMysql.Post) http.Handler {
 	r := chi.NewRouter()
-	//r.Get("/", pHandler.Fetch)
 	r.Get("/{id:[0-9]+}", pHandler.Fetch)
 	return r
 }
