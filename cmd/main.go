@@ -6,17 +6,26 @@ import (
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-ini/ini"
 	"log"
 	"net/http"
 )
 
 func main() {
-	dbHost := "rm-uf61g6789v5v1fc19vo.mysql.rds.aliyuncs.com"
-	dbPort := "3306"
-	dbPass := "NMTTYps!2021"
-	dbName := "go_test"
 
-	connection, err := navigation.ConnectSQL(dbHost, dbPort, dbPass, dbName)
+	// 读取配置文件
+	cfg, err := ini.Load("config.ini")
+	if err != nil {
+		log.Fatal("====配置文件读取异常====", err)
+	}
+
+	dbHost := cfg.Section("database").Key("host").String()
+	dbPort := cfg.Section("database").Key("port").String()
+	dbUser := cfg.Section("database").Key("username").String()
+	dbPass := cfg.Section("database").Key("password").String()
+	dbName := cfg.Section("database").Key("database").String()
+
+	connection, err := navigation.ConnectSQL(dbUser, dbHost, dbPort, dbPass, dbName)
 	if err != nil {
 		log.Fatal("====数据库创建异常====", err)
 	} else {
@@ -30,13 +39,13 @@ func main() {
 	// 记录每次请求的详细信息
 	router.Use(middleware.Logger)
 
-	pHandler := phMysql.NewPostHandler(connection)
+	phHandler := phMysql.NewJobHandler(connection)
 
 	//定义了一条新路线Router路由它有两个参数：路由的路径和一个以Router实例作为参数的函数。
 	//路径设置为“/”，这意味着该路由将匹配任何传入的 HTTP 请求，其 URL 以正斜杠开头。
 	//传递给该方法的函数Route然后将Router实例作为参数并使用该方法定义一个新的子路由器Mount。
 	router.Route("/", func(rt chi.Router) {
-		rt.Mount("/tianyun", postRouter(pHandler))
+		rt.Mount("/tianyun", postRouter(phHandler))
 	})
 
 	fmt.Println("Server listen at :8005")
@@ -50,8 +59,9 @@ func main() {
 }
 
 // postRouter 一个完全独立的路由器
-func postRouter(pHandler *phMysql.Post) http.Handler {
-	r := chi.NewRouter()
-	r.Get("/{id:[0-9]+}", pHandler.Fetch)
-	return r
+func postRouter(phHandler *phMysql.CreateTask) http.Handler {
+	router := chi.NewRouter()
+	//router.Get("/{id:[0-9]+}", phHandler.Operate)
+	router.Post("/", phHandler.CreateJob)
+	return router
 }

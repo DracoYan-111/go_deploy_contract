@@ -10,7 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"log"
 	"math/big"
-	"testing"
 	"time"
 )
 
@@ -25,8 +24,8 @@ type Structure struct {
 }
 
 // GoContractDeployment 创建合约并返回合约地址
-func GoContractDeployment(structure Structure, t *testing.T) string {
-	auth, client := GoCreateConnection("https://data-seed-prebsc-1-s1.binance.org:8545/", t)
+func GoContractDeployment(structure Structure) (*ethclient.Client, string, string) {
+	auth, client := GoCreateConnection("https://data-seed-prebsc-1-s1.binance.org:8545/")
 
 	address, txData, _, err := box721.DeployBox721(
 		auth,
@@ -38,39 +37,43 @@ func GoContractDeployment(structure Structure, t *testing.T) string {
 	)
 
 	if err != nil {
-		t.Log("创建合约异常", address.Hex())
+		log.Println("创建合约异常", address.Hex())
 	}
-	t.Log("开始等待", txData.Hash().Hex())
+	log.Println("开始等待", txData.Hash().Hex())
+
+	// todo 修改任务状态为1正在进行中
+
 	time.Sleep(5 * time.Second)
-	return address.Hex()
+
+	return client, address.Hex(), txData.Hash().Hex()
 }
 
 // GoTransactionNews 查询使用的gas
-func GoTransactionNews(client *ethclient.Client, hash string, t *testing.T) uint64 {
+func GoTransactionNews(client *ethclient.Client, hash string) *big.Int {
 	txHash := common.HexToHash(hash)
 
 	// 获取交易
 	_, isPending, err := client.TransactionByHash(context.Background(), txHash)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// 如果交易未被打包，等待它被打包
 	if isPending {
-		log.Fatal("Transaction is pending")
+		log.Println("Transaction is pending")
 	}
 
 	// 获取交易所使用的gas数量
 	receipt, err := client.TransactionReceipt(context.Background(), txHash)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	t.Log(receipt.GasUsed)
-	return receipt.GasUsed
+	log.Println(receipt.GasUsed)
+	return new(big.Int).SetUint64(receipt.GasUsed)
 }
 
 // GoCreateConnection createConnection
-func GoCreateConnection(url string, t *testing.T) (*bind.TransactOpts, *ethclient.Client) {
+func GoCreateConnection(url string) (*bind.TransactOpts, *ethclient.Client) {
 	var client *ethclient.Client
 	var err error
 	if len(url) > 0 {
@@ -78,40 +81,40 @@ func GoCreateConnection(url string, t *testing.T) (*bind.TransactOpts, *ethclien
 		fmt.Println("000000000000000000000000000000")
 		client, err = ethclient.Dial(url)
 		if err != nil {
-			t.Log("连接到节点异常", err)
+			log.Println("连接到节点异常", err)
 		}
 	} else {
 		fmt.Println("11111111111111111111111111111111")
 		// Connect to node
 		client, err = ethclient.Dial(RpcUrl)
 		if err != nil {
-			t.Log("连接到节点异常", err)
+			log.Println("连接到节点异常", err)
 		}
 	}
 
 	// Create private key instance
 	privateKey, err := crypto.HexToECDSA(UserPrivateKey)
 	if err != nil {
-		t.Log("加载私钥异常", err)
+		log.Println("加载私钥异常", err)
 	}
 
 	//Get the current chain ID
 	chainID, err := client.ChainID(context.Background())
 	if err != nil {
-		t.Log("获取链ID异常", err)
+		log.Println("获取链ID异常", err)
 	}
 	auth, _ := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
 
 	// Get the latest random number of the current user
 	nonce, err := client.PendingNonceAt(context.Background(), auth.From)
 	if err != nil {
-		t.Log("最新nonce异常", err)
+		log.Println("最新nonce异常", err)
 	}
 
 	// Estimated gasPrice
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
-		t.Log("gasPrice获取异常", err)
+		log.Println("gasPrice获取异常", err)
 	}
 
 	auth.Nonce = big.NewInt(int64(nonce))
