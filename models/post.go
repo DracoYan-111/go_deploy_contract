@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+// 接收参数
+type ReceivePost struct {
+	Opcode       string `json:"id"`
+	ContractName string `json:"name"`
+	ChainId      int64  `json:"chainId"`
+}
+
 // ReturnPost 返回的信息结构
 type ReturnPost struct {
 	Opcode       int64          `json:"id"`
@@ -19,13 +26,13 @@ type ReturnPost struct {
 // Post 数据库的信息结构
 type Post struct {
 	ID            int64     `json:"id"`
-	Opcode        int64     `json:"opcode"`
-	ContractName  string    `json:"contract name"`
-	ContractAddr  string    `json:"contract address"`
-	ContractHash  string    `json:"contract hash"`
-	GasUsed       int64     `json:"gas price"`
-	GasUST        int64     `json:"gas UST"`
-	ChainId       int64     `json:"chain id"`
+	Opcode        string    `json:"opcode"`
+	ContractName  string    `json:"contract_name"`
+	ContractAddr  string    `json:"contract_address"`
+	ContractHash  string    `json:"contract_hash"`
+	GasUsed       int64     `json:"gas_price"`
+	GasUST        int64     `json:"gas_usdt"`
+	ChainId       int64     `json:"chain_id"`
 	CreatedAt     time.Time `json:"created_at"`
-	CurrentStatus int64     `json:"current status"`
+	CurrentStatus int64     `json:"current_status"`
 }

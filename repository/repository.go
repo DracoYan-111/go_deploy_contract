@@ -7,8 +7,10 @@ import (
 
 // PostRepo explain...
 type PostRepo interface {
-	Fetch(ctx context.Context, id int64) *models.Post
+	Operate(ctx context.Context, status int64) []*models.Post
 
-	//
-	AddJob(ctx context.Context, p models.Post) string
+	// AddJob 插入数据
+	// @param ctx context.Context
+	// @param post *models.Post
+	AddJob(ctx context.Context, p []models.ReceivePost) string
 }

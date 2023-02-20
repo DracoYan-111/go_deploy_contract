@@ -15,11 +15,12 @@ type DB struct {
 var dbConn = &DB{}
 
 // ConnectSQL 连接到数据库
-func ConnectSQL(host, port, pass, dbname string) (*DB, error) {
+func ConnectSQL(user, host, port, pass, dbname string) (*DB, error) {
 	// 数据库用户名:数据库密码@tcp(127.0.0.1:3306)/数据库名称/?charset=utf-8
 	// 生成数据库连接信息
 	dbSource := fmt.Sprintf(
-		"root:%s@tcp(%s:%s)/%s?charset=utf8",
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8",
+		user,
 		pass,
 		host,
 		port,
