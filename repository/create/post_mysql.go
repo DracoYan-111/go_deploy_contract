@@ -61,6 +61,25 @@ func (m *mysqlPostRepo) AddJob(ctx context.Context, p models.Post) string {
 	return "s"
 }
 
+func (m *mysqlPostRepo) Create(ctx context.Context, p *models.ReceivePost) string {
+	query := "Insert posts SET title=?, content=?"
+
+	log.Println(p.Opcode, p.ChainId, p.ContractName)
+
+	_, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+	}
+	//
+	//res, err := stmt.ExecContext(ctx, p.Title, p.Content)
+	//defer stmt.Close()
+	//
+	//if err != nil {
+	//	return -1, err
+	//}
+
+	return "res.LastInsertId()"
+}
+
 func (m *mysqlPostRepo) Fetch(ctx context.Context, id int64) *models.Post {
 	query := "Select * From go_test_db where id=?"
 	post, err := m.fetch(ctx, query, id)
