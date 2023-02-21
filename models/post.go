@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// 接收参数
+// ReceivePost 接收参数
 type ReceivePost struct {
 	Opcode       string `json:"id"`
 	ContractName string `json:"name"`
@@ -23,8 +23,8 @@ type ReturnPost struct {
 	GasUST       big.Int        `json:"gas UST"`
 }
 
-// Post 数据库的信息结构
-type Post struct {
+// DataPost 数据库的信息结构
+type DataPost struct {
 	ID            int64     `json:"id"`
 	Opcode        string    `json:"opcode"`
 	ContractName  string    `json:"contract_name"`
