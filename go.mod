@@ -7,6 +7,7 @@ require (
 	github.com/go-chi/chi v1.5.4
 	github.com/go-ini/ini v1.67.0
 	github.com/go-sql-driver/mysql v1.7.0
+	github.com/robfig/cron v1.2.0
 	golang.org/x/crypto v0.6.0
 )
 

@@ -1,8 +1,10 @@
 package try_test
 
 import (
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
+	"time"
 )
 
 func TestDeploy(t *testing.T) {
@@ -28,8 +30,31 @@ func TestDeploy(t *testing.T) {
 	//	return
 	//}
 	//fmt.Println(password)
+	//a := internal.GetBnbToUsdt(big.NewInt(1e10))
+	//fmt.Print(a)
+	//comparePassword("Tianyun", "$2a$10$yuKr.CVq0o9K4a8QUDDmbumc6E6rn7L7jme8RP26MR92p3jsty2E6")
+	// 创建用于接收状态的 channel
+	status := make(chan bool)
 
-	comparePassword("Tianyun", "$2a$10$yuKr.CVq0o9K4a8QUDDmbumc6E6rn7L7jme8RP26MR92p3jsty2E6")
+	// 在一个新的 goroutine 中执行后续代码
+	go processTask(status)
+
+	// 立即返回状态信息给前端
+	fmt.Println("正在处理，请稍候...")
+
+	// 等待从 channel 中接收到状态信息
+	if <-status {
+		fmt.Println("处理成功！")
+	} else {
+		fmt.Println("处理失败！")
+	}
+}
+func processTask(status chan<- bool) {
+	// 执行一些耗时的操作
+	time.Sleep(5 * time.Second)
+
+	// 处理完后向 channel 中发送状态信息
+	status <- true
 }
 
 func hashPassword(password string) (string, error) {

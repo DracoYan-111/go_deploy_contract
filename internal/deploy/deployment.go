@@ -25,7 +25,7 @@ type Structure struct {
 
 // GoContractDeployment 创建合约并返回合约地址
 func GoContractDeployment(structure Structure) (*ethclient.Client, string, string) {
-	auth, client := GoCreateConnection("https://data-seed-prebsc-1-s1.binance.org:8545/")
+	auth, client := GoCreateConnection("https://data-seed-prebsc-1-s3.binance.org:8545/")
 
 	address, txData, _, err := box721.DeployBox721(
 		auth,
@@ -39,7 +39,7 @@ func GoContractDeployment(structure Structure) (*ethclient.Client, string, strin
 	if err != nil {
 		log.Println("创建合约异常", address.Hex())
 	}
-	log.Println("开始等待", txData.Hash().Hex())
+	log.Println("开始等待部署成功", txData.Hash().Hex())
 
 	// todo 修改任务状态为1正在进行中
 
@@ -78,17 +78,19 @@ func GoCreateConnection(url string) (*bind.TransactOpts, *ethclient.Client) {
 	var err error
 	if len(url) > 0 {
 		// Connect to node
-		fmt.Println("000000000000000000000000000000")
 		client, err = ethclient.Dial(url)
 		if err != nil {
 			log.Println("连接到节点异常", err)
+		} else {
+			log.Println("连接到节点成功")
 		}
 	} else {
-		fmt.Println("11111111111111111111111111111111")
 		// Connect to node
 		client, err = ethclient.Dial(RpcUrl)
 		if err != nil {
 			log.Println("连接到节点异常", err)
+		} else {
+			log.Println("连接到节点成功")
 		}
 	}
 
@@ -123,4 +125,10 @@ func GoCreateConnection(url string) (*bind.TransactOpts, *ethclient.Client) {
 	auth.GasPrice = gasPrice
 
 	return auth, client
+}
+
+func UpdateLibrary2(i int) int {
+	i++
+	fmt.Println("cron times : ", i)
+	return i
 }
