@@ -6,6 +6,16 @@ import (
 	"time"
 )
 
+const (
+	UpdateTaskOne = "update one"
+)
+
+const (
+	InsertIntoJob = "INSERT INTO go_test_db (opcode, contract_name, chain_id) VALUES (?, ?, ?)"
+	SelectOperate = "SELECT * FROM go_test_db WHERE current_status=?"
+	SelectGetOne  = "SELECT * FROM go_test_db WHERE current_status=0 LIMIT 1"
+)
+
 // ReceivePost 接收参数
 type ReceivePost struct {
 	Opcode       string `json:"id"`
@@ -30,8 +40,8 @@ type DataPost struct {
 	ContractName  string    `json:"contract_name"`
 	ContractAddr  string    `json:"contract_address"`
 	ContractHash  string    `json:"contract_hash"`
-	GasUsed       int64     `json:"gas_price"`
-	GasUST        int64     `json:"gas_usdt"`
+	GasUsed       int64     `json:"gas_used"`
+	GasUST        float64   `json:"gas_usdt"`
 	ChainId       int64     `json:"chain_id"`
 	CreatedAt     time.Time `json:"created_at"`
 	CurrentStatus int64     `json:"current_status"`

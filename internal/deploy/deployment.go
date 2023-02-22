@@ -3,6 +3,7 @@ package deploy
 import (
 	"GoContractDeployment/pkg/box721"
 	"context"
+	"errors"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -23,8 +24,8 @@ type Structure struct {
 }
 
 // GoContractDeployment 创建合约并返回合约地址
-func GoContractDeployment(structure Structure) (*ethclient.Client, string, string) {
-	auth, client := GoCreateConnection("https://data-seed-prebsc-1-s3.binance.org:8545/")
+func GoContractDeployment(structure Structure) (string, string, *big.Int) {
+	auth, client := GoCreateConnection("")
 
 	address, txData, _, err := box721.DeployBox721(
 		auth,
@@ -40,15 +41,17 @@ func GoContractDeployment(structure Structure) (*ethclient.Client, string, strin
 	}
 	log.Println("开始等待部署成功", txData.Hash().Hex())
 
-	// todo 修改任务状态为1正在进行中
+	gasUsed, err := goTransactionNews(client, txData.Hash().Hex())
 
-	time.Sleep(5 * time.Second)
+	gas := gasUsed.Mul(gasUsed, txData.GasPrice())
+	return address.Hex(), txData.Hash().Hex(), gas.Add(gas, big.NewInt(5e10))
 
-	return client, address.Hex(), txData.Hash().Hex()
 }
 
-// GoTransactionNews 查询使用的gas
-func GoTransactionNews(client *ethclient.Client, hash string) *big.Int {
+// goTransactionNews 查询使用的gas
+func goTransactionNews(client *ethclient.Client, hash string) (*big.Int, error) {
+	time.Sleep(9 * time.Second)
+
 	txHash := common.HexToHash(hash)
 
 	// 获取交易
@@ -59,16 +62,17 @@ func GoTransactionNews(client *ethclient.Client, hash string) *big.Int {
 
 	// 如果交易未被打包，等待它被打包
 	if isPending {
-		log.Println("Transaction is pending")
-	}
+		log.Println("交易正在打包")
 
-	// 获取交易所使用的gas数量
-	receipt, err := client.TransactionReceipt(context.Background(), txHash)
-	if err != nil {
-		log.Println(err)
+		return new(big.Int).SetUint64(0), errors.New("交易进行中")
+	} else {
+		// 获取交易所使用的gas数量
+		receipt, err := client.TransactionReceipt(context.Background(), txHash)
+		if err != nil {
+			log.Println(err, "获取交易所使用的gas数量")
+		}
+		return new(big.Int).SetUint64(receipt.GasUsed), nil
 	}
-	log.Println(receipt.GasUsed)
-	return new(big.Int).SetUint64(receipt.GasUsed)
 }
 
 // GoCreateConnection createConnection

@@ -3,7 +3,7 @@ package handler
 import (
 	"GoContractDeployment/models"
 	"GoContractDeployment/navigation"
-	repository "GoContractDeployment/repository"
+	"GoContractDeployment/repository"
 	"GoContractDeployment/repository/create"
 	"encoding/json"
 	"log"
@@ -53,12 +53,11 @@ func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Requ
 			log.Println("<==== 接收字符串为空 ====>", err)
 		}
 		// 插入数据库
-		//okData := task.repo.AddJob(request.Context(), data)
+		okData := task.Repo.AddJob(request.Context(), data)
 
-		a := task.Repo.Operate(request.Context(), 0)
+		task.Repo.Operate(request.Context(), 0)
 
-		log.Println(a)
-		respondWithData(writer, http.StatusOK, "okData")
+		respondWithData(writer, http.StatusOK, okData)
 	} else {
 		respondWithData(writer, http.StatusBadRequest, "data is empty")
 	}

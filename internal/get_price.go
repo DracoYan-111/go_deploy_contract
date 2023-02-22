@@ -22,9 +22,9 @@ var Usdt = common.HexToAddress("0xaB1a4d4f1D656d2450692D237fdD6C7f9146e814")
 // var Wbnb = common.HexToAddress("0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c")
 // var Usdt = common.HexToAddress("0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56")
 
-func GetBnbToUsdt(amountIn *big.Int) string {
+func GetBnbToUsdt(amountIn *big.Int) float64 {
 
-	amountIn.Mul(amountIn, big.NewInt(10000005000))
+	//amountIn.Mul(amountIn, big.NewInt(10000005000))
 	log.Println(amountIn)
 	var path = []common.Address{Wbnb, Cake, Usdt}
 	instance := GoLoadWithAddress()
@@ -34,9 +34,9 @@ func GetBnbToUsdt(amountIn *big.Int) string {
 	}
 	convert := new(big.Float)
 	convert.SetString(out[len(out)-1].String())
-	value := new(big.Float).Quo(convert, big.NewFloat(math.Pow10(18)))
+	value, _ := new(big.Float).Quo(convert, big.NewFloat(math.Pow10(18))).Float64()
 
-	return value.Text('f', 10)
+	return value
 
 	//instance := GoLoadWithAddress()
 	//weth, _ := instance.WETH(nil)

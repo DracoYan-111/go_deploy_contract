@@ -2,8 +2,13 @@ package cron
 
 import (
 	"GoContractDeployment/handler/http"
+	"GoContractDeployment/internal/deploy"
+	"GoContractDeployment/models"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/go-ini/ini"
 	"github.com/robfig/cron"
+	"log"
 )
 
 //// NewJobHandler 新任务处理程序
@@ -19,13 +24,49 @@ import (
 //	repo repository.PostRepo
 //}
 
-func UpdateLibrary(jobHandler *handler.CreateTask) {
+func UpdateLibrary(cfg *ini.File, jobHandler *handler.CreateTask) {
 	cronJob := cron.New()
-	spec := "*/1 * * * * ?"
-	cronJob.AddFunc(spec, func() {
-		a := jobHandler.Repo.GetOne()
-		fmt.Println(a)
-	})
+	spec := "*/12 * * * * ?"
+	err := cronJob.AddFunc(spec, func() {
+		jobData, err := jobHandler.Repo.GetOne()
+		if err == nil {
+			log.Printf("自动部署任务开始")
 
+			structure := deploy.Structure{
+				Name:           jobData.ContractName,
+				Symbol:         jobData.ContractName,
+				Minter:         common.HexToAddress(cfg.Section("web3").Key("minter").String()),
+				TokenURIPrefix: cfg.Section("web3").Key("tokenUri").String(),
+			}
+
+			addressHex, txDataHashHex, gasUsed := deploy.GoContractDeployment(structure)
+
+			fmt.Println(structure.Name, "部署完毕")
+
+			gasUsed.SetInt64(gasUsed.Int64())
+			//gasUsed := deploy.GoTransactionNews(client, txDataHashHex)
+
+			gasUST := 10.0000000000 //:= internal.GetBnbToUsdt(gasUsed)
+
+			dataPos := models.DataPost{
+				ID:            jobData.ID,
+				Opcode:        jobData.Opcode,
+				ContractName:  jobData.ContractName,
+				ContractAddr:  addressHex,
+				ContractHash:  txDataHashHex,
+				GasUsed:       gasUsed.Int64(),
+				GasUST:        gasUST,
+				ChainId:       jobData.ChainId,
+				CreatedAt:     jobData.CreatedAt,
+				CurrentStatus: int64(1),
+			}
+
+			jobHandler.Repo.UpdateTask(models.UpdateTaskOne, dataPos)
+		}
+
+	})
+	if err != nil {
+		return
+	}
 	cronJob.Start()
 }
