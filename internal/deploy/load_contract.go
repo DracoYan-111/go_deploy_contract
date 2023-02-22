@@ -13,7 +13,7 @@ func GoInteractiveContract(contract *box721.Box721, t *testing.T) {
 	auth, _ := GoCreateConnection("")
 	tx, err := contract.Erc721Mint(auth, big.NewInt(0), common.HexToAddress("0x0000000000000000000000000000000000000001"), "")
 	if err != nil {
-		t.Log("发起交易异常", err)
+		t.Log("<==== 发起交易异常 ====>", err)
 	}
 	fmt.Printf("tx sent: %s", tx.Hash().Hex())
 }
@@ -22,7 +22,7 @@ func GoInteractiveContract(contract *box721.Box721, t *testing.T) {
 func GoQueryContract(contract *box721.Box721, t *testing.T) {
 	name, err := contract.Name(nil)
 	if err != nil {
-		t.Log("查询失败", err)
+		t.Log("<==== 查询失败 ====>", err)
 	}
 	t.Log(name)
 }
