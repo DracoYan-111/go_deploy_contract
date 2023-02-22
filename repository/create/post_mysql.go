@@ -2,22 +2,23 @@ package create
 
 import (
 	"GoContractDeployment/models"
-	pRepo "GoContractDeployment/repository"
+	"GoContractDeployment/repository"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 )
 
 // NewSQLPostRepo 返回后存储库接口的实现
-func NewSQLPostRepo(Conn *sql.DB) pRepo.PostRepo {
-	return &mysqlPostRepo{
+func NewSQLPostRepo(Conn *sql.DB) repository.PostRepo {
+	return &MysqlPostRepo{
 		Conn: Conn,
 	}
 }
 
-type mysqlPostRepo struct {
+type MysqlPostRepo struct {
 	Conn *sql.DB
 }
 
@@ -35,7 +36,7 @@ type mysqlPostRepo struct {
 //	CurrentStatus int64     `json:"current_status"`
 //}
 //
-//func (m *mysqlPostRepo) fetch(ctx context.Context, query string, args ...interface{}) []*Post {
+//func (m *MysqlPostRepo) fetch(ctx context.Context, query string, args ...interface{}) []*Post {
 //
 //	queryContext, err := m.Conn.QueryContext(ctx, query, args...)
 //	if err != nil {
@@ -65,7 +66,7 @@ type mysqlPostRepo struct {
 //	return payload
 //}
 
-func (myRepo *mysqlPostRepo) fetch(ctx context.Context, query string, args ...interface{}) []*models.DataPost {
+func (myRepo *MysqlPostRepo) fetch(ctx context.Context, query string, args ...interface{}) []*models.DataPost {
 
 	queryContext, err := myRepo.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -102,12 +103,12 @@ func (myRepo *mysqlPostRepo) fetch(ctx context.Context, query string, args ...in
 	return payload
 }
 
-func (myRepo *mysqlPostRepo) AddJob(ctx context.Context, p []models.ReceivePost) string {
-	query := "INSERT INTO go_test_db (opcode, contract_name, chain_id) VALUES (?, ?, ?)"
+func (myRepo *MysqlPostRepo) AddJob(ctx context.Context, p []models.ReceivePost) string {
+	//query := "INSERT INTO go_test_db (opcode, contract_name, chain_id) VALUES (?, ?, ?)"
 
 	args := make([]string, len(p))
 	for i := 0; i < len(p); i++ {
-		_, err := myRepo.Conn.ExecContext(ctx, query, p[i].Opcode, p[i].ContractName, p[i].ChainId)
+		_, err := myRepo.Conn.ExecContext(ctx, models.InsertIntoJob, p[i].Opcode, p[i].ContractName, p[i].ChainId)
 
 		if err != nil {
 			log.Println("====插入数据异常====", err)
@@ -128,19 +129,51 @@ func (myRepo *mysqlPostRepo) AddJob(ctx context.Context, p []models.ReceivePost)
 	return fmt.Sprintf("%v", args)
 }
 
-func (myRepo *mysqlPostRepo) Operate(ctx context.Context, status int64) []*models.DataPost {
-	query := "SELECT * FROM go_test_db WHERE current_status=?"
-	post := myRepo.fetch(ctx, query, status)
+func (myRepo *MysqlPostRepo) Operate(ctx context.Context, status int64) []*models.DataPost {
+	//query := "SELECT * FROM go_test_db WHERE current_status=?"
+
+	post := myRepo.fetch(ctx, models.SelectOperate, status)
 
 	return post
 }
 
-func (myRepo *mysqlPostRepo) GetOne() *models.DataPost {
-	queryContext, _ := myRepo.Conn.Query("SELECT * FROM go_test_db WHERE current_status=0 LIMIT 1")
+func (myRepo *MysqlPostRepo) GetOne() (*models.DataPost, error) {
+	//query := "SELECT * FROM go_test_db WHERE current_status=0 LIMIT 1"
+
+	queryContext, _ := myRepo.Conn.Query(models.SelectGetOne)
+
 	post := dealWith(queryContext)
-	return post[0]
+	if len(post) > 0 {
+		return post[0], nil
+	}
+	return new(models.DataPost), errors.New("数据为空")
 }
 
+func (myRepo *MysqlPostRepo) UpdateTask(which string, dataPost models.DataPost) string {
+	switch {
+	case which == models.UpdateTaskOne:
+		//query := "UPDATE go_test_db SET =?, =? WHERE id=?"
+		stmt, err := myRepo.Conn.Prepare("UPDATE go_test_db SET contract_address=?, contract_hash=? ,gas_used=? ,gas_usdt=?, current_status=? WHERE id=?")
+
+		if err != nil {
+			panic(err.Error())
+		}
+
+		result, err := stmt.Exec(dataPost.ContractAddr, dataPost.ContractHash, dataPost.GasUsed, dataPost.GasUST, dataPost.CurrentStatus, dataPost.ID)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		_, err = result.RowsAffected()
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	return ""
+}
+
+// dealWith 处理为对象
 func dealWith(queryContext *sql.Rows) []*models.DataPost {
 
 	payload := make([]*models.DataPost, 0)

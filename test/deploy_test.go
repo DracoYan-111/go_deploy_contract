@@ -1,20 +1,23 @@
 package try_test
 
 import (
+	"GoContractDeployment/internal"
+	"GoContractDeployment/internal/deploy"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
 	"time"
 )
 
 func TestDeploy(t *testing.T) {
-	//stream :=
-	//	deploy.Structure{
-	//		Name:           "TianYun",
-	//		Symbol:         "TianYun",
-	//		Minter:         common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8"),
-	//		TokenURIPrefix: "test",
-	//	}
+	stream :=
+		deploy.Structure{
+			Name:           "TianYun",
+			Symbol:         "TianYun",
+			Minter:         common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8"),
+			TokenURIPrefix: "test",
+		}
 	//fmt.Print(stream)
 	////
 	////amount := big.NewInt(1e18)
@@ -34,20 +37,19 @@ func TestDeploy(t *testing.T) {
 	//fmt.Print(a)
 	//comparePassword("Tianyun", "$2a$10$yuKr.CVq0o9K4a8QUDDmbumc6E6rn7L7jme8RP26MR92p3jsty2E6")
 	// 创建用于接收状态的 channel
-	status := make(chan bool)
 
-	// 在一个新的 goroutine 中执行后续代码
-	go processTask(status)
+	addressHex, txDataHashHex, gasUsed := deploy.GoContractDeployment(stream)
+	fmt.Println(addressHex)
+	fmt.Println(txDataHashHex)
+	fmt.Println("========================")
+	//
+	////gasUsed := deploy.GoTransactionNews(client, txDataHashHex)
+	//fmt.Println(gasUsed)
+	//fmt.Println("========================")
+	//
+	gasToUsdt := internal.GetBnbToUsdt(gasUsed)
+	fmt.Println(gasToUsdt)
 
-	// 立即返回状态信息给前端
-	fmt.Println("正在处理，请稍候...")
-
-	// 等待从 channel 中接收到状态信息
-	if <-status {
-		fmt.Println("处理成功！")
-	} else {
-		fmt.Println("处理失败！")
-	}
 }
 func processTask(status chan<- bool) {
 	// 执行一些耗时的操作

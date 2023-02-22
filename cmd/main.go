@@ -16,7 +16,7 @@ import (
 func main() {
 	connection, cfg := navigation.CreateData()
 	phHandler := phMysql.NewJobHandler(connection)
-	cron.UpdateLibrary(phHandler)
+	cron.UpdateLibrary(cfg, phHandler)
 	basicConfiguration(phHandler, cfg)
 	//// 定义传入 HTTP 请求的路由规则
 	//router := chi.NewRouter()
