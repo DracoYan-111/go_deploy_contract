@@ -3,7 +3,6 @@ package deploy
 import (
 	"GoContractDeployment/pkg/box721"
 	"context"
-	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -80,43 +79,43 @@ func GoCreateConnection(url string) (*bind.TransactOpts, *ethclient.Client) {
 		// Connect to node
 		client, err = ethclient.Dial(url)
 		if err != nil {
-			log.Println("连接到节点异常", err)
+			log.Println("<==== 连接到节点异常 ====>", err)
 		} else {
-			log.Println("连接到节点成功")
+			log.Println("<++++ 连接到节点成功 ++++>")
 		}
 	} else {
 		// Connect to node
 		client, err = ethclient.Dial(RpcUrl)
 		if err != nil {
-			log.Println("连接到节点异常", err)
+			log.Println("<==== 连接到节点异常 ====>", err)
 		} else {
-			log.Println("连接到节点成功")
+			log.Println("<++++ 连接到节点成功 ++++>")
 		}
 	}
 
 	// Create private key instance
 	privateKey, err := crypto.HexToECDSA(UserPrivateKey)
 	if err != nil {
-		log.Println("加载私钥异常", err)
+		log.Println("<==== 加载私钥异常 ====>", err)
 	}
 
 	//Get the current chain ID
 	chainID, err := client.ChainID(context.Background())
 	if err != nil {
-		log.Println("获取链ID异常", err)
+		log.Println("<==== 获取链ID异常 ====>", err)
 	}
 	auth, _ := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
 
 	// Get the latest random number of the current user
 	nonce, err := client.PendingNonceAt(context.Background(), auth.From)
 	if err != nil {
-		log.Println("最新nonce异常", err)
+		log.Println("<==== 最新nonce异常 ====>", err)
 	}
 
 	// Estimated gasPrice
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Println("gasPrice获取异常", err)
+		log.Println("<==== gasPrice获取异常 ====>", err)
 	}
 
 	auth.Nonce = big.NewInt(int64(nonce))
@@ -125,10 +124,4 @@ func GoCreateConnection(url string) (*bind.TransactOpts, *ethclient.Client) {
 	auth.GasPrice = gasPrice
 
 	return auth, client
-}
-
-func UpdateLibrary2(i int) int {
-	i++
-	fmt.Println("cron times : ", i)
-	return i
 }

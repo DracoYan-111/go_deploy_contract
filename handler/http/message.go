@@ -41,7 +41,7 @@ func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Requ
 	err := json.NewDecoder(request.Body).Decode(&requestBody)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
-		log.Println("====获取传入数据异常====", err)
+		log.Println("<==== 获取传入数据异常 ====>", err)
 	}
 
 	// 判断字符串不能为空
@@ -50,7 +50,7 @@ func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Requ
 
 		err = json.Unmarshal([]byte(requestBody.DataList), &data)
 		if err != nil {
-			log.Println("====接收字符串为空====", err)
+			log.Println("<==== 接收字符串为空 ====>", err)
 		}
 		// 插入数据库
 		//okData := task.repo.AddJob(request.Context(), data)

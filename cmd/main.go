@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-ini/ini"
 	"log"
+	"net"
 	"net/http"
 )
 
@@ -53,7 +54,10 @@ func postRouter(phHandler *phMysql.CreateTask) http.Handler {
 
 // basicConfiguration 加载基础配置
 func basicConfiguration(phHandler *phMysql.CreateTask, cfg *ini.File) {
-	cron.UpdateLibrary(phHandler)
+	// 服务相关配置
+	port := cfg.Section("server").Key("port").String()
+	local := getLocal()
+	fmt.Println("<service address: " + local + ":" + port + ">")
 
 	// 定义传入 HTTP 请求的路由规则
 	router := chi.NewRouter()
@@ -68,15 +72,35 @@ func basicConfiguration(phHandler *phMysql.CreateTask, cfg *ini.File) {
 	router.Route("/", func(rt chi.Router) {
 		rt.Mount("/tianyun", postRouter(phHandler))
 	})
-	fmt.Println("Server listen at :8005")
-
-	// 启动定时任务
-	log.Println("++++定时任务启动成功++++")
 
 	// 将请求路由到正确的处理程序
-	if err := http.ListenAndServe(":"+cfg.Section("server").Key("port").String(), router); err != nil {
-		log.Println("====服务启动异常====", err)
+	if err := http.ListenAndServe(":"+port, router); err != nil {
+		log.Println("<==== 服务启动异常 ====>", err)
 	} else {
-		log.Println("++++服务启动成功++++")
+		log.Println("<++++ 服务启动成功 ++++>")
 	}
+}
+
+// getLocal 获取本机ip地址
+func getLocal() string {
+	localIP := ""
+	ifAces, err := net.Interfaces()
+	if err != nil {
+		log.Println("<==== IP地址获取异常 ====>")
+	} else {
+		log.Println("<++++ IP地址获取成功 ++++>")
+	}
+	for _, face := range ifAces {
+		address, err := face.Addrs()
+		if err != nil {
+			panic(err)
+		}
+		for _, addr := range address {
+			aspnet, ok := addr.(*net.IPNet)
+			if ok && !aspnet.IP.IsLoopback() && aspnet.IP.To4() != nil {
+				localIP = aspnet.IP.String()
+			}
+		}
+	}
+	return localIP
 }

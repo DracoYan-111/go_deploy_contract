@@ -21,25 +21,25 @@ func CreateData() (*DB, *ini.File) {
 	var configIni = []string{"username", "host", "port", "password", "database"}
 	cfg, err := ini.Load("config.ini")
 	if err != nil {
-		log.Println("====配置文件读取异常====", err)
+		log.Println("<==== 配置文件读取异常 ====>", err)
 	} else {
-		log.Println("++++配置文件读取成功++++")
+		log.Println("<++++ 配置文件读取成功 ++++>")
 	}
 	for i := 0; i < len(configIni); i++ {
 		dataBase[i] = cfg.Section("database").Key(configIni[i]).String()
 		if len(dataBase[i]) > 0 {
-			log.Println("++++" + configIni[i] + "加载成功++++")
+			log.Println("<++++ " + configIni[i] + "加载成功 ++++>")
 		} else {
-			log.Println("====" + configIni[i] + "加载异常====")
+			log.Println("<==== " + configIni[i] + "加载异常 ====>")
 		}
 	}
 
 	//连接到数据库
 	connection, err := connectSQL(dataBase[0], dataBase[1], dataBase[2], dataBase[3], dataBase[4])
 	if err != nil {
-		log.Println("====数据库创建异常====", err)
+		log.Println("<==== 数据库创建异常 ====>", err)
 	} else {
-		log.Println("++++数据库创建成功++++")
+		log.Println("<++++ 数据库创建成功 ++++>")
 	}
 	return connection, cfg
 }
@@ -60,16 +60,16 @@ func connectSQL(user, host, port, pass, dbname string) (*DB, error) {
 	// 连接到数据库
 	dbData, err := sql.Open("mysql", dbSource)
 	if err != nil {
-		log.Fatal("====数据库连接异常====", err)
+		log.Println("<==== 数据库连接异常 ====>", err)
 	} else {
-		log.Println("++++数据库连接成功++++")
+		log.Println("<++++ 数据库连接成功 ++++>")
 	}
 
 	// 检查数据库连接
 	if err = dbData.Ping(); err != nil {
-		log.Fatal("====数据库检查未通过====", err)
+		log.Println("<==== 数据库检查未通过 ====>", err)
 	} else {
-		log.Println("++++数据库检查通过++++")
+		log.Println("<++++ 数据库检查通过 ++++>")
 	}
 
 	dbConn.SQL = dbData

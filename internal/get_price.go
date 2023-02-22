@@ -30,7 +30,7 @@ func GetBnbToUsdt(amountIn *big.Int) string {
 	instance := GoLoadWithAddress()
 	out, err := instance.GetAmountsOut(nil, amountIn, path)
 	if err != nil {
-		log.Fatal("价格查询失败", err)
+		log.Fatal("<==== 价格查询失败 ====>", err)
 	}
 	convert := new(big.Float)
 	convert.SetString(out[len(out)-1].String())
