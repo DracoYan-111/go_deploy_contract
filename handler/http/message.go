@@ -58,6 +58,7 @@ func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Requ
 		//task.Repo.Operate(request.Context(), 0)
 
 		respondWithData(writer, http.StatusOK, okData)
+
 	} else {
 		respondWithData(writer, http.StatusBadRequest, "data is empty")
 	}

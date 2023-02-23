@@ -2,6 +2,7 @@ package cron
 
 import (
 	"GoContractDeployment/handler/http"
+	"GoContractDeployment/internal"
 	"GoContractDeployment/internal/deploy"
 	"GoContractDeployment/models"
 	"github.com/ethereum/go-ethereum/common"
@@ -25,7 +26,7 @@ import (
 
 func UpdateLibrary(cfg *ini.File, jobHandler *handler.CreateTask) {
 	cronJob := cron.New()
-	spec := "*/12 * * * * ?"
+	spec := "*/20 * * * * ?"
 	err := cronJob.AddFunc(spec, func() {
 		jobData, err := jobHandler.Repo.GetOne()
 		if err == nil {
@@ -39,12 +40,20 @@ func UpdateLibrary(cfg *ini.File, jobHandler *handler.CreateTask) {
 			}
 
 			addressHex, txDataHashHex, gasUsed, currentStatus := deploy.GoContractDeployment(structure)
-			log.Println(structure.Name, "部署完毕")
-			
-			gasUsed.SetInt64(gasUsed.Int64())
-			//gasUsed := deploy.GoTransactionNews(client, txDataHashHex)
+			if addressHex == "" && txDataHashHex == "" {
+				log.Println(structure.Name, "部署失败")
+			} else {
+				log.Println(structure.Name, "部署完毕")
+			}
 
-			gasUST := 10.0000000000 //:= internal.GetBnbToUsdt(gasUsed)
+			gasUse := gasUsed.SetInt64(gasUsed.Int64())
+
+			//gasUsed := deploy.GoTransactionNews(client, txDataHashHex)
+			var gasUST float64
+			if gasUse.Int64() != 0 {
+				gasUST = internal.GetBnbToUsdt(gasUsed)
+				log.Println("<==== 价格查询完成 ====>")
+			}
 
 			dataPos := models.DataPost{
 				ID:            jobData.ID,
@@ -60,8 +69,8 @@ func UpdateLibrary(cfg *ini.File, jobHandler *handler.CreateTask) {
 			}
 
 			jobHandler.Repo.UpdateTask(models.UpdateTaskOne, dataPos)
+			log.Printf("自动部署任务结束")
 		}
-
 	})
 	if err != nil {
 		return

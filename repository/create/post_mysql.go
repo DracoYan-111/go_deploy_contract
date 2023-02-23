@@ -143,9 +143,10 @@ func (myRepo *MysqlPostRepo) GetOne() (*models.DataPost, error) {
 	queryContext, _ := myRepo.Conn.Query(models.SelectGetOne)
 
 	post := dealWith(queryContext)
-	if len(post) > 0 {
+	if len(post) != 0 {
 		return post[0], nil
 	}
+
 	return new(models.DataPost), errors.New("数据为空")
 }
 
@@ -177,30 +178,40 @@ func (myRepo *MysqlPostRepo) UpdateTask(which string, dataPost models.DataPost) 
 func dealWith(queryContext *sql.Rows) []*models.DataPost {
 
 	payload := make([]*models.DataPost, 0)
-	for queryContext.Next() {
-		data := &models.DataPost{}
-		var createdAt []uint8
-		err := queryContext.Scan(
-			&data.ID,
-			&data.Opcode,
-			&data.ContractName,
-			&data.ContractAddr,
-			&data.ContractHash,
-			&data.GasUsed,
-			&data.GasUST,
-			&data.ChainId,
-			&createdAt,
-			&data.CurrentStatus,
-		)
-		if err != nil {
-			log.Println("转为实体类时异常", err)
+
+	if queryContext != nil {
+
+		for queryContext.Next() {
+
+			data := &models.DataPost{}
+
+			var createdAt []uint8
+			err := queryContext.Scan(
+				&data.ID,
+				&data.Opcode,
+				&data.ContractName,
+				&data.ContractAddr,
+				&data.ContractHash,
+				&data.GasUsed,
+				&data.GasUST,
+				&data.ChainId,
+				&createdAt,
+				&data.CurrentStatus,
+			)
+
+			if err != nil {
+				log.Println("转为实体类时异常", err)
+			}
+			if len(createdAt) > 0 {
+				createdTime, err := time.Parse("2006-01-02 15:04:05", string(createdAt))
+				if err != nil {
+					log.Println("解析时间戳时异常", err)
+				}
+				data.CreatedAt = createdTime
+			}
+
+			payload = append(payload, data)
 		}
-		createdTime, err := time.Parse("2006-01-02 15:04:05", string(createdAt))
-		if err != nil {
-			log.Println("解析时间戳时异常", err)
-		}
-		data.CreatedAt = createdTime
-		payload = append(payload, data)
 	}
 	return payload
 }

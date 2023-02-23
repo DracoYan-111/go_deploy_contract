@@ -1,0 +1,5 @@
+config.ini
+/vendor
+/test
+.DS_Store
+.idea/
