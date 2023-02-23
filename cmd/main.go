@@ -16,6 +16,15 @@ import (
 func main() {
 	connection, cfg := navigation.CreateData()
 	phHandler := phMysql.NewJobHandler(connection)
+
+	//one, _ := phHandler.Repo.GetOne()
+	//
+	//log.Println(one.GasUsed, "++++++++++++++++++++")
+	//
+	//a := internal.GetBnbToUsdt(big.NewInt(one.GasUsed))
+	//
+	//log.Panicln(a, "++++++++++++++++++++")
+
 	cron.UpdateLibrary(cfg, phHandler)
 	basicConfiguration(phHandler, cfg)
 	//// 定义传入 HTTP 请求的路由规则

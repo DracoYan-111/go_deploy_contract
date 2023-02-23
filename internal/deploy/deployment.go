@@ -25,8 +25,15 @@ type Structure struct {
 
 // GoContractDeployment 创建合约并返回合约地址
 func GoContractDeployment(structure Structure) (string, string, *big.Int, int64) {
-	auth, client := GoCreateConnection("")
+	auth, client := GoCreateConnection("https://data-seed-prebsc-1-s1.binance.org:8545")
 
+	balance, err := client.BalanceAt(context.Background(), auth.From, nil)
+
+	if balance.Int64() < 5e16 {
+		log.Println("用户余额不足", balance)
+
+		return "", "", big.NewInt(0), 0
+	}
 	address, txData, _, err := box721.DeployBox721(
 		auth,
 		client,
@@ -37,7 +44,8 @@ func GoContractDeployment(structure Structure) (string, string, *big.Int, int64)
 	)
 
 	if err != nil {
-		log.Println("创建合约异常", address.Hex())
+		log.Println("创建合约异常", err)
+
 		return "", "", big.NewInt(0), 0
 	}
 	log.Println(structure.Name, "开始部署:", txData.Hash().Hex())
@@ -45,15 +53,15 @@ func GoContractDeployment(structure Structure) (string, string, *big.Int, int64)
 	gasUsed, err := goTransactionNews(client, txData.Hash().Hex())
 
 	gas := gasUsed.Mul(gasUsed, txData.GasPrice())
+	time.Sleep(3 * time.Second)
 
-	log.Println(txData.GasPrice(), "____________________======_______________")
 	return address.Hex(), txData.Hash().Hex(), gas.Add(gas, big.NewInt(5e10)), 1
 
 }
 
 // goTransactionNews 查询使用的gas
 func goTransactionNews(client *ethclient.Client, hash string) (*big.Int, error) {
-	time.Sleep(9 * time.Second)
+	time.Sleep(7 * time.Second)
 
 	txHash := common.HexToHash(hash)
 
