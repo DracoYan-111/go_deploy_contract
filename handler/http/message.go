@@ -55,7 +55,7 @@ func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Requ
 		// 插入数据库
 		okData := task.Repo.AddJob(request.Context(), data)
 
-		task.Repo.Operate(request.Context(), 0)
+		//task.Repo.Operate(request.Context(), 0)
 
 		respondWithData(writer, http.StatusOK, okData)
 	} else {

@@ -4,7 +4,6 @@ import (
 	"GoContractDeployment/handler/http"
 	"GoContractDeployment/internal/deploy"
 	"GoContractDeployment/models"
-	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/go-ini/ini"
 	"github.com/robfig/cron"
@@ -39,10 +38,9 @@ func UpdateLibrary(cfg *ini.File, jobHandler *handler.CreateTask) {
 				TokenURIPrefix: cfg.Section("web3").Key("tokenUri").String(),
 			}
 
-			addressHex, txDataHashHex, gasUsed := deploy.GoContractDeployment(structure)
-
-			fmt.Println(structure.Name, "部署完毕")
-
+			addressHex, txDataHashHex, gasUsed, currentStatus := deploy.GoContractDeployment(structure)
+			log.Println(structure.Name, "部署完毕")
+			
 			gasUsed.SetInt64(gasUsed.Int64())
 			//gasUsed := deploy.GoTransactionNews(client, txDataHashHex)
 
@@ -58,7 +56,7 @@ func UpdateLibrary(cfg *ini.File, jobHandler *handler.CreateTask) {
 				GasUST:        gasUST,
 				ChainId:       jobData.ChainId,
 				CreatedAt:     jobData.CreatedAt,
-				CurrentStatus: int64(1),
+				CurrentStatus: currentStatus,
 			}
 
 			jobHandler.Repo.UpdateTask(models.UpdateTaskOne, dataPos)

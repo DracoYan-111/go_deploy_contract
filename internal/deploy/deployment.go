@@ -24,7 +24,7 @@ type Structure struct {
 }
 
 // GoContractDeployment 创建合约并返回合约地址
-func GoContractDeployment(structure Structure) (string, string, *big.Int) {
+func GoContractDeployment(structure Structure) (string, string, *big.Int, int64) {
 	auth, client := GoCreateConnection("")
 
 	address, txData, _, err := box721.DeployBox721(
@@ -38,13 +38,16 @@ func GoContractDeployment(structure Structure) (string, string, *big.Int) {
 
 	if err != nil {
 		log.Println("创建合约异常", address.Hex())
+		return "", "", big.NewInt(0), 0
 	}
-	log.Println("开始等待部署成功", txData.Hash().Hex())
+	log.Println(structure.Name, "开始部署:", txData.Hash().Hex())
 
 	gasUsed, err := goTransactionNews(client, txData.Hash().Hex())
 
 	gas := gasUsed.Mul(gasUsed, txData.GasPrice())
-	return address.Hex(), txData.Hash().Hex(), gas.Add(gas, big.NewInt(5e10))
+
+	log.Println(txData.GasPrice(), "____________________======_______________")
+	return address.Hex(), txData.Hash().Hex(), gas.Add(gas, big.NewInt(5e10)), 1
 
 }
 

@@ -30,7 +30,7 @@ func GoQueryContract(contract *box721.Box721, t *testing.T) {
 // GoCreateAndGenerate 创建合约并通过地址生成合约实例
 func GoCreateAndGenerate(structure Structure, t *testing.T) *box721.Box721 {
 	//contractAddr := GoContractDeployment(structure)
-	_, address, _ := GoContractDeployment(structure)
+	_, address, _, _ := GoContractDeployment(structure)
 	example := GoLoadWithAddress(address, t)
 	GoQueryContract(example, t)
 	GoInteractiveContract(example, t)
