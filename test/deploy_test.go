@@ -38,7 +38,7 @@ func TestDeploy(t *testing.T) {
 	//comparePassword("Tianyun", "$2a$10$yuKr.CVq0o9K4a8QUDDmbumc6E6rn7L7jme8RP26MR92p3jsty2E6")
 	// 创建用于接收状态的 channel
 
-	addressHex, txDataHashHex, gasUsed := deploy.GoContractDeployment(stream)
+	addressHex, txDataHashHex, gasUsed, _ := deploy.GoContractDeployment(stream)
 	fmt.Println(addressHex)
 	fmt.Println(txDataHashHex)
 	fmt.Println("========================")
