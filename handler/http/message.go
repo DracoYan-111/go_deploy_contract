@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"GoContractDeployment/internal/aescrypt"
 	"GoContractDeployment/models"
 	"GoContractDeployment/navigation"
 	"GoContractDeployment/repository"
@@ -44,10 +45,15 @@ func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Requ
 		log.Println("<==== 获取传入数据异常 ====>", err)
 	}
 
+	key := []byte("ca5b20230224b5ac")
 	// 判断字符串不能为空
 	if len(requestBody.DataList) != 0 {
 		var data []models.ReceivePost
-
+		requestBody.DataList, err = aescrypt.AesDecrypt(requestBody.DataList, key)
+		if err != nil {
+			log.Println("<==== 解密字符串异常====>", err)
+		}
+		//log.Fatal(requestBody.DataList, "===--------------=========1111111111=====")
 		err = json.Unmarshal([]byte(requestBody.DataList), &data)
 		if err != nil {
 			log.Println("<==== 接收字符串为空 ====>", err)

@@ -135,7 +135,7 @@ func GoCreateConnection(url string) (*bind.TransactOpts, *ethclient.Client) {
 
 	auth.Nonce = big.NewInt(int64(nonce))
 	auth.Value = big.NewInt(0)      // in wei
-	auth.GasLimit = uint64(6000000) // in units
+	auth.GasLimit = uint64(5100000) // in units
 	auth.GasPrice = gasPrice
 
 	return auth, client
