@@ -26,6 +26,7 @@ func main() {
 	//log.Panicln(a, "++++++++++++++++++++")
 
 	cron.UpdateLibrary(cfg, phHandler)
+	cron.ReturnStatus(cfg, phHandler)
 	basicConfiguration(phHandler, cfg)
 	//// 定义传入 HTTP 请求的路由规则
 	//router := chi.NewRouter()

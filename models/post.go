@@ -1,8 +1,6 @@
 package models
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"math/big"
 	"time"
 )
 
@@ -15,12 +13,13 @@ type ReceivePost struct {
 
 // ReturnPost 返回的信息结构
 type ReturnPost struct {
-	Opcode       int64          `json:"id"`
-	ContractAddr common.Address `json:"contract address"`
-	ContractHash string         `json:"contract hash"`
-	ChainId      big.Int        `json:"chain id"`
-	GasUsed      big.Int        `json:"gas price"`
-	GasUST       big.Int        `json:"gas UST"`
+	Opcode         int64   `json:"productContractId"`
+	ChainId        int64   `json:"chainId"`
+	GasUST         float64 `json:"gasFee"`
+	ContractAddr   string  `json:"contract"`
+	ContractHash   string  `json:"txHash"`
+	ContractOwner  string  `json:"owner"`
+	ContractMinter string  `json:"minter"`
 }
 
 // DataPost 数据库的信息结构

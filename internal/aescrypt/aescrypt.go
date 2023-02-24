@@ -49,20 +49,20 @@ func AesDecrypt(cipher string, key []byte) (string, error) {
 	}
 
 	// 创建一个ECB模式的解密器
-	mode := NewECBDecrypter(block)
+	mode := newECBDecrypter(block)
 
 	// 解密数据
 	plaintext := make([]byte, len(ciphertext))
 	mode.CryptBlocks(plaintext, ciphertext)
 
 	// 去掉填充的部分
-	plaintext = PKCS7Unpad(plaintext, block.BlockSize())
+	plaintext = pKCS7Unpad(plaintext, block.BlockSize())
 
 	return string(plaintext), err
 }
 
 // NewECBDecrypter 创建一个新的ECB模式解密器
-func NewECBDecrypter(block cipher.Block) cipher.BlockMode {
+func newECBDecrypter(block cipher.Block) cipher.BlockMode {
 	return &ecbDecrypter{block}
 }
 
@@ -87,7 +87,7 @@ func (x *ecbDecrypter) CryptBlocks(dst, src []byte) {
 }
 
 // PKCS7Unpad 去除PKCS7填充
-func PKCS7Unpad(data []byte, blockSize int) []byte {
+func pKCS7Unpad(data []byte, blockSize int) []byte {
 	if len(data) == 0 {
 		return []byte{}
 	}

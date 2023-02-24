@@ -11,7 +11,7 @@ type PostRepo interface {
 	// @param ctx context.Context
 	// @param status The status of the task in the database
 	// @return related information array
-	Operate(ctx context.Context, status int64) []*models.DataPost
+	Operate() ([]*models.DataPost, error)
 
 	// AddJob 插入数据
 	// @param ctx context.Context
@@ -28,4 +28,6 @@ type PostRepo interface {
 	// @param dataPost Update the information passed in by the task
 	// @return 成功信息
 	UpdateTask(which string, dataPost models.DataPost) string
+
+	UpdateState(idArray []int64) string
 }

@@ -129,12 +129,18 @@ func (myRepo *MysqlPostRepo) AddJob(ctx context.Context, p []models.ReceivePost)
 	return fmt.Sprintf("%v", args)
 }
 
-func (myRepo *MysqlPostRepo) Operate(ctx context.Context, status int64) []*models.DataPost {
-	//query := "SELECT * FROM go_test_db WHERE current_status=?"
+func (myRepo *MysqlPostRepo) Operate() ([]*models.DataPost, error) {
+	//query := "SELECT * FROM go_test_db WHERE current_status=2"
 
-	post := myRepo.fetch(ctx, models.SelectOperate, status)
+	queryContext, _ := myRepo.Conn.Query(models.SelectOperate)
 
-	return post
+	post := dealWith(queryContext)
+	if len(post) != 0 {
+		return post, nil
+	}
+	var nilPost []*models.DataPost
+
+	return nilPost, errors.New("数据为空")
 }
 
 func (myRepo *MysqlPostRepo) GetOne() (*models.DataPost, error) {
@@ -153,14 +159,35 @@ func (myRepo *MysqlPostRepo) GetOne() (*models.DataPost, error) {
 func (myRepo *MysqlPostRepo) UpdateTask(which string, dataPost models.DataPost) string {
 	switch {
 	case which == models.UpdateTaskOne:
-		//query := "UPDATE go_test_db SET =?, =? WHERE id=?"
-		stmt, err := myRepo.Conn.Prepare("UPDATE go_test_db SET contract_address=?, contract_hash=? ,gas_used=? ,gas_usdt=?, current_status=? WHERE id=?")
-
+		//query := "UPDATE go_test_db SET contract_address=?, contract_hash=? ,gas_used=? ,gas_usdt=?, current_status=? WHERE id=?"
+		stmt, err := myRepo.Conn.Prepare(models.TaskOneSql)
+		if err != nil {
+			panic(err.Error())
+		}
+		result, err := stmt.Exec(dataPost.ContractAddr, dataPost.ContractHash, dataPost.GasUsed, dataPost.GasUST, dataPost.CurrentStatus, dataPost.ID)
 		if err != nil {
 			panic(err.Error())
 		}
 
-		result, err := stmt.Exec(dataPost.ContractAddr, dataPost.ContractHash, dataPost.GasUsed, dataPost.GasUST, dataPost.CurrentStatus, dataPost.ID)
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			panic(err.Error())
+		}
+		log.Println("rowsAffected", rowsAffected)
+	}
+
+	return ""
+}
+
+func (myRepo *MysqlPostRepo) UpdateState(idArray []int64) string {
+	query := "UPDATE go_test_db SET current_status=2 WHERE id=?"
+
+	for i := 0; i < len(idArray); i++ {
+		stmt, err := myRepo.Conn.Prepare(query)
+		if err != nil {
+			panic(err.Error())
+		}
+		result, err := stmt.Exec(idArray[i])
 		if err != nil {
 			panic(err.Error())
 		}
@@ -170,8 +197,7 @@ func (myRepo *MysqlPostRepo) UpdateTask(which string, dataPost models.DataPost) 
 			panic(err.Error())
 		}
 	}
-
-	return ""
+	return "完成"
 }
 
 // dealWith 处理为对象
