@@ -1,76 +1,75 @@
 package handler
 
 import (
-	"GoContractDeployment/internal/aescrypt"
 	"GoContractDeployment/models"
 	"GoContractDeployment/navigation"
 	"GoContractDeployment/repository"
 	"GoContractDeployment/repository/create"
+	"GoContractDeployment/utils"
 	"encoding/json"
 	"log"
 	"net/http"
 )
 
-// NewJobHandler 新任务处理程序
+// NewJobHandler new task handler
+// @param db Database connection information
 func NewJobHandler(db *navigation.DB) *CreateTask {
 	return &CreateTask{
-		// 加载到接口的实例
+		// instance loaded into the interface
 		Repo: create.NewSQLPostRepo(db.SQL),
 	}
 }
 
-// CreateTask 返回所有的接口
+// CreateTask return all interfaces
 type CreateTask struct {
 	Repo repository.PostRepo
 }
 
-// Receive 接收传入数据
+// Receive receive incoming data
 type Receive struct {
 	DataList string `json:"sign"`
 }
 
-// ReturnData 返回结束数据
+// ReturnData return end data
 type ReturnData struct {
 	State   int         `json:"state"`
 	Payload interface{} `json:"data"`
 }
 
-// CreateJob 添加任务
+// CreateJob add task
+// @param writer Build http response
+// @param request Received by the server and returned to the client
 func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Request) {
-	// 获取传入数据
+
 	var requestBody Receive
 	err := json.NewDecoder(request.Body).Decode(&requestBody)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
-		log.Println("<==== 获取传入数据异常 ====>", err)
+		log.Println("<==== message:Get incoming data exception ====>", err)
 	}
 
-	key := []byte("ca5b20230224b5ac")
-	// 判断字符串不能为空
+	// Judgment string cannot be empty
 	if len(requestBody.DataList) != 0 {
 		var data []models.ReceivePost
-		requestBody.DataList, err = aescrypt.AesDecrypt(requestBody.DataList, key)
+		requestBody.DataList, err = utils.AesDecrypt(requestBody.DataList)
 		if err != nil {
-			log.Println("<==== 解密字符串异常====>", err)
+			log.Println("<==== message:Decrypted string exception====>", err)
 		}
-		//log.Fatal(requestBody.DataList, "===--------------=========1111111111=====")
 		err = json.Unmarshal([]byte(requestBody.DataList), &data)
 		if err != nil {
-			log.Println("<==== 接收字符串为空 ====>", err)
+			log.Println("<==== message:Received string is empty ====>", err)
 		}
-		// 插入数据库
+		// insert database
 		okData := task.Repo.AddJob(request.Context(), data)
-
-		//task.Repo.Operate(request.Context(), 0)
 
 		respondWithData(writer, http.StatusOK, okData)
 
 	} else {
-		respondWithData(writer, http.StatusBadRequest, "data is empty")
+		respondWithData(writer, http.StatusBadRequest, "message:Data is empty")
 	}
 }
 
-// respondWithData 返回信息
+// respondWithData Returned messages
 func respondWithData(writer http.ResponseWriter, code int, payload interface{}) {
 	var returnData ReturnData
 	returnData.State = code
@@ -79,7 +78,7 @@ func respondWithData(writer http.ResponseWriter, code int, payload interface{}) 
 	respondentJSON(writer, code, returnData)
 }
 
-// respondentJSON 处理返回信息
+// respondentJSON Handle returned information
 func respondentJSON(writer http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 
@@ -87,6 +86,6 @@ func respondentJSON(writer http.ResponseWriter, code int, payload interface{}) {
 	writer.WriteHeader(code)
 	_, err := writer.Write(response)
 	if err != nil {
-		log.Println("Respondent JSON Exception:", err)
+		log.Println("message:Respondent JSON Exception:", err)
 	}
 }

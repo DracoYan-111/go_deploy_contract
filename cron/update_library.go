@@ -5,45 +5,40 @@ import (
 	"GoContractDeployment/internal"
 	"GoContractDeployment/internal/deploy"
 	"GoContractDeployment/models"
+	"GoContractDeployment/utils"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/go-ini/ini"
 	"github.com/robfig/cron"
 	"log"
 )
 
-//// NewJobHandler 新任务处理程序
-//func NewJobHandler(db *navigation.DB) *CreateTask {
-//	return &CreateTask{
-//		// 加载到接口的实例
-//		repo: create.NewSQLPostRepo(db.SQL),
-//	}
-//}
-//
-//// CreateTask 返回所有的接口
-//type CreateTask struct {
-//	repo repository.PostRepo
-//}
+// UpdateLibrary Update database scheduled tasks
+func UpdateLibrary(jobHandler *handler.CreateTask) {
 
-func UpdateLibrary(cfg *ini.File, jobHandler *handler.CreateTask) {
+	loading, err := utils.ConfigurationLoading("web3", []string{"minter", "tokenUri"})
+	if err != nil {
+		log.Println(err)
+	}
+
 	cronJob := cron.New()
 	spec := "*/20 * * * * ?"
-	err := cronJob.AddFunc(spec, func() {
+	err = cronJob.AddFunc(spec, func() {
+
 		jobData, err := jobHandler.Repo.GetOne()
 		if err == nil {
-			log.Printf("自动部署任务开始")
+			log.Printf("UpdateLibrary:Automatic deployment task starts")
 
 			structure := deploy.Structure{
 				Name:           jobData.ContractName,
 				Symbol:         jobData.ContractName,
-				Minter:         common.HexToAddress(cfg.Section("web3").Key("minter").String()),
-				TokenURIPrefix: cfg.Section("web3").Key("tokenUri").String(),
+				Minter:         common.HexToAddress(loading[0]),
+				TokenURIPrefix: loading[1],
 			}
 
 			addressHex, txDataHashHex, gasUsed, currentStatus := deploy.GoContractDeployment(structure)
 			if addressHex == "" && txDataHashHex == "" {
-				log.Println(structure.Name, "部署失败")
+				log.Println(structure.Name, "<==== UpdateLibrary:Deployment failed ====>")
 			} else {
-				log.Println(structure.Name, "部署完毕")
+				log.Println(structure.Name, "<++++ UpdateLibrary:Deployed ++++>")
 			}
 
 			gasUse := gasUsed.SetInt64(gasUsed.Int64())
@@ -52,7 +47,7 @@ func UpdateLibrary(cfg *ini.File, jobHandler *handler.CreateTask) {
 			var gasUST float64
 			if gasUse.Int64() != 0 {
 				gasUST = internal.GetBnbToUsdt(gasUsed)
-				log.Println("<==== 价格查询完成 ====>")
+				log.Println("<++++ UpdateLibrary:Price query completed ++++>")
 			}
 
 			dataPos := models.DataPost{
@@ -69,7 +64,7 @@ func UpdateLibrary(cfg *ini.File, jobHandler *handler.CreateTask) {
 			}
 
 			jobHandler.Repo.UpdateTask(models.UpdateTaskOne, dataPos)
-			log.Printf("自动部署任务结束")
+			log.Printf("<++++ UpdateLibrary:update completed ++++>")
 		}
 	})
 	if err != nil {

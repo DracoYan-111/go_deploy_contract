@@ -2,48 +2,41 @@ package cron
 
 import (
 	handler "GoContractDeployment/handler/http"
-	"GoContractDeployment/internal/aescrypt"
 	"GoContractDeployment/models"
+	"GoContractDeployment/utils"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-ini/ini"
 	"github.com/robfig/cron"
 	"log"
 	"net/http"
 	"strconv"
 )
 
-func ReturnStatus(cfg *ini.File, jobHandler *handler.CreateTask) {
+func ReturnStatus(jobHandler *handler.CreateTask) {
 	cronJob := cron.New()
-	spec := "*/20 * * * * ?"
+	spec := "*/40 * * * * ?"
 	err := cronJob.AddFunc(spec, func() {
+
 		jobData, err := jobHandler.Repo.Operate()
 		if err == nil {
-			log.Println("cron job is running")
+			log.Println("ReturnStatus:Cron job is running")
 
 			if len(jobData) != 0 {
-
 				data, idList, err := processData(jobData)
+
+				encrypt, err := utils.Encrypt(data)
 				if err != nil {
-					log.Panicln(data, err)
+					log.Panicln("ReturnStatus:", encrypt, err)
 				}
 
-				key := []byte("ca5b20230224b5ac")
-				encrypt, err := aescrypt.Encrypt(data, key)
+				transfer, err := request(encrypt)
 				if err != nil {
-					log.Panicln(encrypt, err)
+					log.Println("ReturnStatus:", transfer, err)
 				}
-
-				//transfer, err := request(encrypt)
-				//if err != nil {
-				//	log.Println(transfer, err)
-				//}
-				a := jobHandler.Repo.UpdateState(idList)
-				log.Println(a)
-
-				//log.Println(transfer)
+				state := jobHandler.Repo.UpdateState(idList)
+				log.Println(state)
 			}
 		}
 	})
@@ -53,12 +46,18 @@ func ReturnStatus(cfg *ini.File, jobHandler *handler.CreateTask) {
 	cronJob.Start()
 }
 
-func processData(jobDatas []*models.DataPost) (string, []int64, error) {
-	// 定义一个ReturnPost数组
+func processData(jobData []*models.DataPost) (string, []int64, error) {
+	// Define a Return Post array
 	var returnPosts []*models.ReturnPost
 	var idList []int64
-	if len(jobDatas) != 0 {
-		for _, jobData := range jobDatas {
+
+	loading, err := utils.ConfigurationLoading("web3", []string{"publicKey", "minter"})
+	if err != nil {
+		log.Panicln("ReturnStatus:", err)
+	}
+
+	if len(jobData) != 0 {
+		for _, jobData := range jobData {
 			numInt64, err := strconv.ParseInt(jobData.Opcode, 10, 64)
 			if err != nil {
 				fmt.Println(err)
@@ -66,27 +65,27 @@ func processData(jobDatas []*models.DataPost) (string, []int64, error) {
 			}
 			id := jobData.ID
 			returnPost := &models.ReturnPost{
-				Opcode:         numInt64, // 按照需要给结构体字段赋值
+				Opcode:         numInt64,
 				ChainId:        jobData.ChainId,
 				GasUST:         jobData.GasUST,
 				ContractAddr:   jobData.ContractAddr,
 				ContractHash:   jobData.ContractHash,
-				ContractOwner:  "",
-				ContractMinter: "",
+				ContractOwner:  loading[0],
+				ContractMinter: loading[1],
 			}
 			returnPosts = append(returnPosts, returnPost)
 			idList = append(idList, id)
 		}
-		// 将结构体数组转换为JSON格式
+		// Convert structure array to JSON format
 		jsonBytes, err := json.Marshal(returnPosts)
 		if err != nil {
 			fmt.Println(err)
-			return "转换失败", idList, err
+			return "ReturnStatus:conversion failed", idList, err
 		}
 		return string(jsonBytes), idList, nil
 	}
 
-	return "", idList, errors.New("数据为空")
+	return "", idList, errors.New("ReturnStatus:data is empty")
 }
 
 type returnData struct {

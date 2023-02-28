@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"GoContractDeployment/pkg/box721"
+	"GoContractDeployment/utils"
 	"context"
 	"errors"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -13,9 +14,6 @@ import (
 	"time"
 )
 
-const RpcUrl = "http://127.0.0.1:8545/"
-const UserPrivateKey = "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-
 type Structure struct {
 	Name           string
 	Symbol         string
@@ -23,14 +21,14 @@ type Structure struct {
 	TokenURIPrefix string
 }
 
-// GoContractDeployment 创建合约并返回合约地址
+// GoContractDeployment Create a contract and return the contract address
 func GoContractDeployment(structure Structure) (string, string, *big.Int, int64) {
-	auth, client := GoCreateConnection("https://data-seed-prebsc-1-s1.binance.org:8545")
+	auth, client := GoCreateConnection()
 
 	balance, err := client.BalanceAt(context.Background(), auth.From, nil)
 
 	if balance.Int64() < 5e16 {
-		log.Println("用户余额不足", balance)
+		log.Println("Deployment:Insufficient user balance", balance)
 
 		return "", "", big.NewInt(0), 0
 	}
@@ -44,93 +42,94 @@ func GoContractDeployment(structure Structure) (string, string, *big.Int, int64)
 	)
 
 	if err != nil {
-		log.Println("创建合约异常", err)
+		log.Println("Deployment:Create contract exception", err)
 
 		return "", "", big.NewInt(0), 0
 	}
-	log.Println(structure.Name, "开始部署:", txData.Hash().Hex())
+	log.Println(structure.Name, "Deployment:Start deployment:", txData.Hash().Hex())
 
 	gasUsed, err := goTransactionNews(client, txData.Hash().Hex())
 
 	gas := gasUsed.Mul(gasUsed, txData.GasPrice())
 	time.Sleep(3 * time.Second)
 
-	return address.Hex(), txData.Hash().Hex(), gas.Add(gas, big.NewInt(5e10)), 1
+	return address.Hex(), txData.Hash().Hex(), gas.Add(gas, big.NewInt(5e12)), 1
 
 }
 
-// goTransactionNews 查询使用的gas
+// goTransactionNews Query the gas used
 func goTransactionNews(client *ethclient.Client, hash string) (*big.Int, error) {
 	time.Sleep(7 * time.Second)
 
 	txHash := common.HexToHash(hash)
 
-	// 获取交易
 	_, isPending, err := client.TransactionByHash(context.Background(), txHash)
 	if err != nil {
 		log.Println(err)
 	}
 
-	// 如果交易未被打包，等待它被打包
 	if isPending {
-		log.Println("交易正在打包")
+		log.Println("Deployment:Transaction is being packaged")
 
-		return new(big.Int).SetUint64(0), errors.New("交易进行中")
+		return new(big.Int).SetUint64(0), errors.New("Deployment:Transaction in progress")
 	} else {
-		// 获取交易所使用的gas数量
 		receipt, err := client.TransactionReceipt(context.Background(), txHash)
 		if err != nil {
-			log.Println(err, "获取交易所使用的gas数量")
+			log.Println(err, "Deployment:Get the amount of gas used by the transaction")
 		}
 		return new(big.Int).SetUint64(receipt.GasUsed), nil
 	}
 }
 
-// GoCreateConnection createConnection
-func GoCreateConnection(url string) (*bind.TransactOpts, *ethclient.Client) {
+// GoCreateConnection CreateConnection
+func GoCreateConnection() (*bind.TransactOpts, *ethclient.Client) {
 	var client *ethclient.Client
 	var err error
-	if len(url) > 0 {
-		// Connect to node
-		client, err = ethclient.Dial(url)
-		if err != nil {
-			log.Println("<==== 连接到节点异常 ====>", err)
-		} else {
-			log.Println("<++++ 连接到节点成功 ++++>")
-		}
-	} else {
-		// Connect to node
-		client, err = ethclient.Dial(RpcUrl)
-		if err != nil {
-			log.Println("<==== 连接到节点异常 ====>", err)
-		} else {
-			log.Println("<++++ 连接到节点成功 ++++>")
-		}
+	//if len(url) > 0 {
+	//	// Connect to node
+	//	client, err = ethclient.Dial(url)
+	//	if err != nil {
+	//		log.Println("<==== Deployment:Connection to node exception ====>", err)
+	//	} else {
+	//		log.Println("<++++ Deployment:Connected to node successfully ++++>")
+	//	}
+	//} else {
+	// Connect to node
+	loading, err := utils.ConfigurationLoading("web3", []string{"rpcUrl", "privateKey"})
+	if err != nil {
+		log.Panicln("ReturnStatus:", err)
 	}
+	client, err = ethclient.Dial(loading[0])
+	if err != nil {
+		log.Println("<==== Deployment:Connection to node exception ====>", err)
+	} else {
+		log.Println("<++++ Deployment:Connected to node successfully ++++>")
+	}
+	//}
 
 	// Create private key instance
-	privateKey, err := crypto.HexToECDSA(UserPrivateKey)
+	privateKey, err := crypto.HexToECDSA(loading[1])
 	if err != nil {
-		log.Println("<==== 加载私钥异常 ====>", err)
+		log.Println("<==== Deployment:Exception loading private key ====>", err)
 	}
 
 	//Get the current chain ID
 	chainID, err := client.ChainID(context.Background())
 	if err != nil {
-		log.Println("<==== 获取链ID异常 ====>", err)
+		log.Println("<==== Deployment:Obtaining the chain ID is abnormal ====>", err)
 	}
 	auth, _ := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
 
 	// Get the latest random number of the current user
 	nonce, err := client.PendingNonceAt(context.Background(), auth.From)
 	if err != nil {
-		log.Println("<==== 最新nonce异常 ====>", err)
+		log.Println("<==== Deployment:Latest nonce exception ====>", err)
 	}
 
 	// Estimated gasPrice
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Println("<==== gasPrice获取异常 ====>", err)
+		log.Println("<==== Deployment:Gas Price get exception ====>", err)
 	}
 
 	auth.Nonce = big.NewInt(int64(nonce))

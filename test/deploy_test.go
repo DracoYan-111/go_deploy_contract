@@ -1,10 +1,7 @@
 package try_test
 
 import (
-	"GoContractDeployment/internal/aescrypt"
-	"crypto/rand"
-	"encoding/hex"
-	"fmt"
+	utils "GoContractDeployment/utils"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"testing"
@@ -56,33 +53,37 @@ func TestDeploy(t *testing.T) {
 	// 128位密钥
 
 	//生成一个16字节的随机数
-	randomBytes := make([]byte, 8)
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		panic(err)
-	}
-	// 将随机数转换为16进制字符串
-	randomString := hex.EncodeToString(randomBytes)
-	fmt.Println(randomString)
+	//randomBytes := make([]byte, 8)
+	//_, err := rand.Read(randomBytes)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//// 将随机数转换为16进制字符串
+	//randomString := hex.EncodeToString(randomBytes)
+	//fmt.Println(randomString)
+	//
+	////("0123456789abcdef")
+	//key := []byte("ca5b20230224b5ac")
+	//
+	////// 需要加密的数据
+	//plaintext := "[{\"chainId\":2,\"id\":\"1605133286670282753\",\"name\":\"创世纪念勋章\"},{\"chainId\":2,\"id\":\"1605133287098101762\",\"name\":\"石氏星经\"}]"
+	//
+	//encrypt, err := utils.Encrypt(plaintext, key)
+	//if err != nil {
+	//	return
+	//}
+	//
+	//log.Println(encrypt)
+	//
+	//decrypt, err := utils.AesDecrypt(encrypt, key)
+	//if err != nil {
+	//	return
+	//}
+	//log.Println(decrypt)
 
-	//("0123456789abcdef")
-	key := []byte("ca5b20230224b5ac")
-
-	//// 需要加密的数据
-	plaintext := "[{\"chainId\":2,\"id\":\"1605133286670282753\",\"name\":\"创世纪念勋章\"},{\"chainId\":2,\"id\":\"1605133287098101762\",\"name\":\"石氏星经\"}]"
-
-	encrypt, err := aescrypt.Encrypt(plaintext, key)
-	if err != nil {
-		return
-	}
-
-	log.Println(encrypt)
-
-	decrypt, err := aescrypt.AesDecrypt(encrypt, key)
-	if err != nil {
-		return
-	}
-	log.Println(decrypt)
+	var configIni = []string{"username", "host", "port", "password", "database"}
+	loading, _ := utils.ConfigurationLoading("database", configIni)
+	log.Panicln(loading)
 
 }
 

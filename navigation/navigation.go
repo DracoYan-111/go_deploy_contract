@@ -1,9 +1,9 @@
 package navigation
 
 import (
+	"GoContractDeployment/utils"
 	"database/sql"
 	"fmt"
-	"github.com/go-ini/ini"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 )
@@ -12,42 +12,23 @@ type DB struct {
 	SQL *sql.DB
 }
 
-// DBConn ...
 var dbConn = &DB{}
 
-func CreateData() (*DB, *ini.File) {
-	// 读取配置文件
-	var dataBase [5]string
-	var configIni = []string{"username", "host", "port", "password", "database"}
-	cfg, err := ini.Load("config.ini")
-	if err != nil {
-		log.Println("<==== 配置文件读取异常 ====>", err)
-	} else {
-		log.Println("<++++ 配置文件读取成功 ++++>")
-	}
-	for i := 0; i < len(configIni); i++ {
-		dataBase[i] = cfg.Section("database").Key(configIni[i]).String()
-		if len(dataBase[i]) > 0 {
-			log.Println("<++++ " + configIni[i] + "加载成功 ++++>")
-		} else {
-			log.Println("<==== " + configIni[i] + "加载异常 ====>")
-		}
-	}
-
-	//连接到数据库
+// CreateData Read configuration file
+func CreateData() *DB {
+	dataBase, _ := utils.ConfigurationLoading("database", []string{"username", "host", "port", "password", "database"})
 	connection, err := connectSQL(dataBase[0], dataBase[1], dataBase[2], dataBase[3], dataBase[4])
 	if err != nil {
-		log.Println("<==== 数据库创建异常 ====>", err)
+		log.Println("<==== navigation:Database creation exception ====>", err)
 	} else {
-		log.Println("<++++ 数据库创建成功 ++++>")
+		log.Println("<++++ navigation:Database created successfully ++++>")
 	}
-	return connection, cfg
+	return connection
 }
 
-// ConnectSQL 连接到数据库
+// ConnectSQL Connect to database
 func connectSQL(user, host, port, pass, dbname string) (*DB, error) {
-	// 数据库用户名:数据库密码@tcp(127.0.0.1:3306)/数据库名称/?charset=utf-8
-	// 生成数据库连接信息
+	// Generate database connection information
 	dbSource := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8",
 		user,
@@ -57,19 +38,19 @@ func connectSQL(user, host, port, pass, dbname string) (*DB, error) {
 		dbname,
 	)
 
-	// 连接到数据库
+	// connect to database
 	dbData, err := sql.Open("mysql", dbSource)
 	if err != nil {
-		log.Println("<==== 数据库连接异常 ====>", err)
+		log.Println("<==== navigation:Database connection exception ====>", err)
 	} else {
-		log.Println("<++++ 数据库连接成功 ++++>")
+		log.Println("<++++ navigation:Database connection succeeded ++++>")
 	}
 
-	// 检查数据库连接
+	// Check database connection
 	if err = dbData.Ping(); err != nil {
-		log.Println("<==== 数据库检查未通过 ====>", err)
+		log.Println("<==== navigation:Database check failed ====>", err)
 	} else {
-		log.Println("<++++ 数据库检查通过 ++++>")
+		log.Println("<++++ navigation:Database check passed ++++>")
 	}
 
 	dbConn.SQL = dbData

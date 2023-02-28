@@ -7,27 +7,29 @@ import (
 
 // PostRepo explain...
 type PostRepo interface {
-	// Operate 查找传入状态的任务
+	// Operate Find tasks with incoming status
 	// @param ctx context.Context
 	// @param status The status of the task in the database
 	// @return related information array
 	Operate() ([]*models.DataPost, error)
 
-	// AddJob 插入数据
+	// AddJob Insert data
 	// @param ctx context.Context
 	// @param dataPost Add the information passed in by the task
 	// @return return success status
 	AddJob(ctx context.Context, dataPost []models.ReceivePost) string
 
-	// GetOne 获取未更新的数据
-	// @return 单条数据库信息
+	// GetOne Get updated data
+	// @return Single database information
 	GetOne() (*models.DataPost, error)
 
-	// UpdateTask 更新任务信息
+	// UpdateTask Update task information
 	// @param which Update the task information
 	// @param dataPost Update the information passed in by the task
-	// @return 成功信息
+	// @return Success message
 	UpdateTask(which string, dataPost models.DataPost) string
 
+	// UpdateState Update task status to complete
+	// @param idArray Id list
 	UpdateState(idArray []int64) string
 }
