@@ -19,9 +19,9 @@ func CreateData() *DB {
 	dataBase, _ := utils.ConfigurationLoading("database", []string{"username", "host", "port", "password", "database"})
 	connection, err := connectSQL(dataBase[0], dataBase[1], dataBase[2], dataBase[3], dataBase[4])
 	if err != nil {
-		log.Println("<==== navigation:Database creation exception ====>", err)
+		log.Println("<==== navigation:数据库创建异常 ====>", err)
 	} else {
-		log.Println("<++++ navigation:Database created successfully ++++>")
+		log.Println("<++++ navigation:数据库创建成功 ++++>")
 	}
 	return connection
 }
@@ -41,16 +41,16 @@ func connectSQL(user, host, port, pass, dbname string) (*DB, error) {
 	// connect to database
 	dbData, err := sql.Open("mysql", dbSource)
 	if err != nil {
-		log.Println("<==== navigation:Database connection exception ====>", err)
+		log.Println("<==== navigation:数据库连接异常 ====>", err)
 	} else {
-		log.Println("<++++ navigation:Database connection succeeded ++++>")
+		log.Println("<++++ navigation:数据库连接成功 ++++>")
 	}
 
 	// Check database connection
 	if err = dbData.Ping(); err != nil {
-		log.Println("<==== navigation:Database check failed ====>", err)
+		log.Println("<==== navigation:数据库检查失败 ====>", err)
 	} else {
-		log.Println("<++++ navigation:Database check passed ++++>")
+		log.Println("<++++ navigation:数据库检查通过 ++++>")
 	}
 
 	dbConn.SQL = dbData

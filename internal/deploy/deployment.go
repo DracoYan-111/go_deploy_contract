@@ -101,35 +101,35 @@ func GoCreateConnection() (*bind.TransactOpts, *ethclient.Client) {
 	}
 	client, err = ethclient.Dial(loading[0])
 	if err != nil {
-		log.Println("<==== Deployment:Connection to node exception ====>", err)
+		log.Println("<==== Deployment:连接到节点异常 ====>", err)
 	} else {
-		log.Println("<++++ Deployment:Connected to node successfully ++++>")
+		log.Println("<++++ Deployment:成功连接到节点 ++++>")
 	}
 	//}
 
 	// Create private key instance
 	privateKey, err := crypto.HexToECDSA(loading[1])
 	if err != nil {
-		log.Println("<==== Deployment:Exception loading private key ====>", err)
+		log.Println("<==== Deployment:异常加载私钥 ====>", err)
 	}
 
 	//Get the current chain ID
 	chainID, err := client.ChainID(context.Background())
 	if err != nil {
-		log.Println("<==== Deployment:Obtaining the chain ID is abnormal ====>", err)
+		log.Println("<==== Deployment:获取链ID异常 ====>", err)
 	}
 	auth, _ := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
 
 	// Get the latest random number of the current user
 	nonce, err := client.PendingNonceAt(context.Background(), auth.From)
 	if err != nil {
-		log.Println("<==== Deployment:Latest nonce exception ====>", err)
+		log.Println("<==== Deployment:最新的随机数异常 ====>", err)
 	}
 
 	// Estimated gasPrice
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
-		log.Println("<==== Deployment:Gas Price get exception ====>", err)
+		log.Println("<==== Deployment:Gas 价格异常 ====>", err)
 	}
 
 	auth.Nonce = big.NewInt(int64(nonce))

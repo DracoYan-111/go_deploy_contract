@@ -21,7 +21,7 @@ func ReturnStatus(jobHandler *handler.CreateTask) {
 
 		jobData, err := jobHandler.Repo.Operate()
 		if err == nil {
-			log.Println("ReturnStatus:Cron job is running")
+			log.Println("ReturnStatus:Cron 作业正在运行")
 
 			if len(jobData) != 0 {
 				data, idList, err := processData(jobData)
@@ -80,12 +80,12 @@ func processData(jobData []*models.DataPost) (string, []int64, error) {
 		jsonBytes, err := json.Marshal(returnPosts)
 		if err != nil {
 			fmt.Println(err)
-			return "ReturnStatus:conversion failed", idList, err
+			return "ReturnStatus:json转换失败", idList, err
 		}
 		return string(jsonBytes), idList, nil
 	}
 
-	return "", idList, errors.New("ReturnStatus:data is empty")
+	return "", idList, errors.New("ReturnStatus:数据为空")
 }
 
 type returnData struct {

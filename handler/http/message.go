@@ -45,7 +45,7 @@ func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Requ
 	err := json.NewDecoder(request.Body).Decode(&requestBody)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
-		log.Println("<==== message:Get incoming data exception ====>", err)
+		log.Println("<==== message:获取传入数据异常 ====>", err)
 	}
 
 	// Judgment string cannot be empty
@@ -53,11 +53,11 @@ func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Requ
 		var data []models.ReceivePost
 		requestBody.DataList, err = utils.AesDecrypt(requestBody.DataList)
 		if err != nil {
-			log.Println("<==== message:Decrypted string exception====>", err)
+			log.Println("<==== message:解密字符串异常 ====>", err)
 		}
 		err = json.Unmarshal([]byte(requestBody.DataList), &data)
 		if err != nil {
-			log.Println("<==== message:Received string is empty ====>", err)
+			log.Println("<==== message:收到的字符串为空 ====>", err)
 		}
 		// insert database
 		okData := task.Repo.AddJob(request.Context(), data)
@@ -65,7 +65,7 @@ func (task *CreateTask) CreateJob(writer http.ResponseWriter, request *http.Requ
 		respondWithData(writer, http.StatusOK, okData)
 
 	} else {
-		respondWithData(writer, http.StatusBadRequest, "message:Data is empty")
+		respondWithData(writer, http.StatusBadRequest, "message:数据为空")
 	}
 }
 
@@ -86,6 +86,6 @@ func respondentJSON(writer http.ResponseWriter, code int, payload interface{}) {
 	writer.WriteHeader(code)
 	_, err := writer.Write(response)
 	if err != nil {
-		log.Println("message:Respondent JSON Exception:", err)
+		log.Println("message:响应者 JSON 异常:", err)
 	}
 }

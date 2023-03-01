@@ -25,7 +25,7 @@ func UpdateLibrary(jobHandler *handler.CreateTask) {
 
 		jobData, err := jobHandler.Repo.GetOne()
 		if err == nil {
-			log.Printf("UpdateLibrary:Automatic deployment task starts")
+			log.Printf("UpdateLibrary:自动部署任务启动")
 
 			structure := deploy.Structure{
 				Name:           jobData.ContractName,
@@ -36,9 +36,9 @@ func UpdateLibrary(jobHandler *handler.CreateTask) {
 
 			addressHex, txDataHashHex, gasUsed, currentStatus := deploy.GoContractDeployment(structure)
 			if addressHex == "" && txDataHashHex == "" {
-				log.Println(structure.Name, "<==== UpdateLibrary:Deployment failed ====>")
+				log.Println(structure.Name, "<==== UpdateLibrary:部署失败 ====>")
 			} else {
-				log.Println(structure.Name, "<++++ UpdateLibrary:Deployed ++++>")
+				log.Println(structure.Name, "<++++ UpdateLibrary:部署成功 ++++>")
 			}
 
 			gasUse := gasUsed.SetInt64(gasUsed.Int64())
@@ -47,7 +47,7 @@ func UpdateLibrary(jobHandler *handler.CreateTask) {
 			var gasUST float64
 			if gasUse.Int64() != 0 {
 				gasUST = internal.GetBnbToUsdt(gasUsed)
-				log.Println("<++++ UpdateLibrary:Price query completed ++++>")
+				log.Println("<++++ UpdateLibrary:价格查询完成 ++++>")
 			}
 
 			dataPos := models.DataPost{
@@ -64,7 +64,7 @@ func UpdateLibrary(jobHandler *handler.CreateTask) {
 			}
 
 			jobHandler.Repo.UpdateTask(models.UpdateTaskOne, dataPos)
-			log.Printf("<++++ UpdateLibrary:update completed ++++>")
+			log.Printf("<++++ UpdateLibrary:更新完成 ++++>")
 		}
 	})
 	if err != nil {

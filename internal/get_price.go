@@ -29,7 +29,7 @@ func GetBnbToUsdt(amountIn *big.Int) float64 {
 	instance := GoLoadWithAddress()
 	out, err := instance.GetAmountsOut(nil, amountIn, path)
 	if err != nil {
-		log.Fatal("<==== GetPrice:Price query failed ====>", err)
+		log.Fatal("<==== GetPrice:价格查询失败 ====>", err)
 	}
 
 	convert := new(big.Float)
@@ -47,7 +47,7 @@ func GoLoadWithAddress() *pancake.PancakeRouter {
 	if err != nil {
 		panic(err)
 	}
-	log.Println("GetPrice:Pancake Swap contract loaded")
+	log.Println("GetPrice:Pancake Swap 合约已加载")
 
 	return instance
 }

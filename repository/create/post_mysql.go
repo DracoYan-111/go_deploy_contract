@@ -26,7 +26,7 @@ func (myRepo *MysqlPostRepo) fetch(ctx context.Context, query string, args ...in
 
 	queryContext, err := myRepo.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
-		log.Println("PostMysql:Exception while querying")
+		log.Println("PostMysql:查询时异常")
 	}
 	payload := dealWith(queryContext)
 	return payload
@@ -40,12 +40,12 @@ func (myRepo *MysqlPostRepo) AddJob(ctx context.Context, p []models.ReceivePost)
 		_, err := myRepo.Conn.ExecContext(ctx, models.InsertIntoJob, p[i].Opcode, p[i].ContractName, p[i].ChainId)
 
 		if err != nil {
-			log.Println("<==== PostMysql:Insert data exception ====>", err)
+			log.Println("<==== PostMysql:插入数据异常 ====>", err)
 			continue
 		}
 		args[i] = p[i].Opcode
 	}
-	log.Println("<==== PostMysql:Successfully inserted data ====>", args)
+	log.Println("<==== PostMysql:插入数据成功 ====>", args)
 
 	return fmt.Sprintf("%v", args)
 }
@@ -61,7 +61,7 @@ func (myRepo *MysqlPostRepo) Operate() ([]*models.DataPost, error) {
 	}
 	var nilPost []*models.DataPost
 
-	return nilPost, errors.New("Operate:Data is empty")
+	return nilPost, errors.New("Operate:数据为空")
 }
 
 func (myRepo *MysqlPostRepo) GetOne() (*models.DataPost, error) {
@@ -74,7 +74,7 @@ func (myRepo *MysqlPostRepo) GetOne() (*models.DataPost, error) {
 		return post[0], nil
 	}
 
-	return new(models.DataPost), errors.New("GetOne:Data is empty")
+	return new(models.DataPost), errors.New("GetOne:数据为空")
 }
 
 func (myRepo *MysqlPostRepo) UpdateTask(which string, dataPost models.DataPost) string {
@@ -147,12 +147,12 @@ func dealWith(queryContext *sql.Rows) []*models.DataPost {
 			)
 
 			if err != nil {
-				log.Println("PostMysql:Exception when converting to entity class", err)
+				log.Println("PostMysql:转换为实体类时出现异常", err)
 			}
 			if len(createdAt) > 0 {
 				createdTime, err := time.Parse("2006-01-02 15:04:05", string(createdAt))
 				if err != nil {
-					log.Println("PostMysql:Exception while parsing timestamp", err)
+					log.Println("PostMysql:解析时间戳时出现异常", err)
 				}
 				data.CreatedAt = createdTime
 			}

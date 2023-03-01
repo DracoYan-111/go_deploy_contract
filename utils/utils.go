@@ -15,7 +15,7 @@ func ConfigurationLoading(types string, list []string) ([]string, error) {
 
 	cfg, err := ini.Load(absPath)
 	if err != nil {
-		log.Panicln("utils:Failed to load config file:", err)
+		log.Panicln("utils:加载配置文件失败:", err)
 	}
 	returnList := make([]string, len(list))
 	if len(list) != 0 {
@@ -25,5 +25,5 @@ func ConfigurationLoading(types string, list []string) ([]string, error) {
 		return returnList, nil
 	}
 
-	return returnList, errors.New("utils:Configuration file read failed")
+	return returnList, errors.New("utils:配置文件读取失败")
 }

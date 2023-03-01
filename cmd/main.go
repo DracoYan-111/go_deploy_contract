@@ -55,9 +55,9 @@ func basicConfiguration(phHandler *phMysql.CreateTask) {
 
 	// Route the request to the correct handler
 	if err := http.ListenAndServe(":"+port, router); err != nil {
-		log.Println("<==== main:Service startup exception ====>", err)
+		log.Println("<==== main:服务启动异常 ====>", err)
 	} else {
-		log.Println("<++++ main:Service started successfully ++++>")
+		log.Println("<++++ main:服务启动成功 ++++>")
 	}
 }
 
@@ -66,9 +66,9 @@ func getLocal() string {
 	localIP := ""
 	ifAces, err := net.Interfaces()
 	if err != nil {
-		log.Println("<==== main:Abnormal IP address acquisition ====>")
+		log.Println("<==== main:IP地址获取异常 ====>")
 	} else {
-		log.Println("<++++ main:IP address obtained successfully ++++>")
+		log.Println("<++++ main:IP地址获取成功 ++++>")
 	}
 	for _, face := range ifAces {
 		address, err := face.Addrs()
