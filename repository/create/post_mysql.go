@@ -118,7 +118,7 @@ func (myRepo *MysqlPostRepo) UpdateState(idArray []int64) string {
 			panic(err.Error())
 		}
 	}
-	return "ok"
+	return "<++++ PostMysql:Status update complete ++++>"
 }
 
 // dealWith 处理为对象
