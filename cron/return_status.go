@@ -34,9 +34,10 @@ func ReturnStatus(jobHandler *handler.CreateTask) {
 				transfer, err := request(encrypt)
 				if err != nil {
 					log.Println("ReturnStatus:", transfer, err)
+				} else {
+					state := jobHandler.Repo.UpdateState(idList)
+					log.Println(state)
 				}
-				state := jobHandler.Repo.UpdateState(idList)
-				log.Println(state)
 			}
 		}
 	})
