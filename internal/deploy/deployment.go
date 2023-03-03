@@ -85,15 +85,6 @@ func goTransactionNews(client *ethclient.Client, hash string) (*big.Int, error) 
 func GoCreateConnection() (*bind.TransactOpts, *ethclient.Client) {
 	var client *ethclient.Client
 	var err error
-	//if len(url) > 0 {
-	//	// Connect to node
-	//	client, err = ethclient.Dial(url)
-	//	if err != nil {
-	//		log.Println("<==== Deployment:Connection to node exception ====>", err)
-	//	} else {
-	//		log.Println("<++++ Deployment:Connected to node successfully ++++>")
-	//	}
-	//} else {
 	// Connect to node
 	loading, err := utils.ConfigurationLoading("web3", []string{"rpcUrl", "privateKey"})
 	if err != nil {

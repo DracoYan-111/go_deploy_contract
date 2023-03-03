@@ -121,7 +121,7 @@ func (myRepo *MysqlPostRepo) UpdateState(idArray []int64) string {
 	return "<++++ PostMysql:Status update complete ++++>"
 }
 
-// dealWith 处理为对象
+// dealWith processed as object
 func dealWith(queryContext *sql.Rows) []*models.DataPost {
 
 	payload := make([]*models.DataPost, 0)

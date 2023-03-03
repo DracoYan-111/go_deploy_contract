@@ -9,18 +9,10 @@ import (
 	"math/big"
 )
 
-// testnet
-
-var PancakeRouter = common.HexToAddress("0xD99D1c33F9fC3444f8101754aBC46c52416550D1")
-var Wbnb = common.HexToAddress("0xae13d989dac2f0debff460ac112a837c89baa7cd")
-var Cake = common.HexToAddress("0xFa60D973F7642B748046464e165A65B7323b0DEE")
-var Usdt = common.HexToAddress("0xaB1a4d4f1D656d2450692D237fdD6C7f9146e814")
-
-// mainnet
-//var network = "https://bsc-dataseed1.binance.org/"
-//var PancakeRouter = common.HexToAddress("0x10ED43C718714eb63d5aA57B78B54704E256024E")
-//var Wbnb = common.HexToAddress("0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c")
-//var Usdt = common.HexToAddress("0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56")
+// PancakeRouter main net
+var PancakeRouter = common.HexToAddress("0x10ED43C718714eb63d5aA57B78B54704E256024E")
+var Wbnb = common.HexToAddress("0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c")
+var Usdt = common.HexToAddress("0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56")
 
 func GetBnbToUsdt(amountIn *big.Int) float64 {
 

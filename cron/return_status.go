@@ -47,6 +47,7 @@ func ReturnStatus(jobHandler *handler.CreateTask) {
 	cronJob.Start()
 }
 
+// processData Process the data to be sent to the server
 func processData(jobData []*models.DataPost) (string, []int64, error) {
 	// Define a Return Post array
 	var returnPosts []*models.ReturnPost
@@ -93,38 +94,38 @@ type returnData struct {
 	DataList string `json:"crossChainBack"`
 }
 
+// request:Initiate an http request to return the modified information
 func request(sign string) (string, error) {
-	// 创建一个returnData结构体
-	//data := returnData{
-	//	DataList: sign,
-	//}
 
-	// 将returnData结构体转换为JSON格式的字节数组
 	jsonData, err := json.Marshal(returnData{DataList: sign})
 	if err != nil {
-		return "请求失败", err
+		return "Request failed", err
 	}
 
-	//log.Fatal(bytes.NewBuffer(jsonData))
-	// 创建一个HTTP请求对象
-	req, err := http.NewRequest("POST", "http://192.168.18.155:8089/dc/contract/crossChainBack", bytes.NewBuffer(jsonData))
+	loading, err := utils.ConfigurationLoading("server", []string{"ask"})
 	if err != nil {
-		return "请求失败", err
+		log.Panicln("ReturnStatus:", err)
 	}
 
-	// 设置请求头中的Content-Type字段
+	// Create an HTTP request object
+	req, err := http.NewRequest("POST", loading[0], bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "ReturnStatus:", err
+	}
+
+	// Set the Content-Type field in the request header
 	req.Header.Set("Content-Type", "application/json")
 
-	// 发起HTTP请求
+	// Initiate an HTTP request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "请求失败", err
+		return "ReturnStatus:", err
 	}
 
-	// 输出响应的状态码
+	// Output the status code of the response
 	if resp.StatusCode != 200 {
-		return "请求失败", errors.New("<==== 状态相应异常:" + strconv.Itoa(resp.StatusCode) + "====>")
+		return "ReturnStatus:", errors.New("<==== abnormal state:" + strconv.Itoa(resp.StatusCode) + "====>")
 	}
-	return "<++++ 请求发起成功 ++++>", nil
+	return "<++++ ReturnStatus:The request was initiated successfully ++++>", nil
 }
