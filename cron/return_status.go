@@ -105,9 +105,14 @@ func request(sign string) (string, error) {
 		return "请求失败", err
 	}
 
+	loading, err := utils.ConfigurationLoading("server", []string{"ask"})
+	if err != nil {
+		log.Panicln("ReturnStatus:", err)
+	}
+	log.Println(loading[0])
 	//log.Fatal(bytes.NewBuffer(jsonData))
 	// 创建一个HTTP请求对象
-	req, err := http.NewRequest("POST", "http://192.168.18.155:8089/dc/contract/crossChainBack", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", loading[0], bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "请求失败", err
 	}
