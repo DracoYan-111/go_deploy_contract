@@ -39,32 +39,32 @@ func UpdateLibrary(jobHandler *handler.CreateTask) {
 				log.Println(structure.Name, "<==== UpdateLibrary:部署失败 ====>")
 			} else {
 				log.Println(structure.Name, "<++++ UpdateLibrary:部署成功 ++++>")
+
+				gasUse := gasUsed.SetInt64(gasUsed.Int64())
+
+				//gasUsed := deploy.GoTransactionNews(client, txDataHashHex)
+				var gasUST float64
+				if gasUse.Int64() != 0 {
+					gasUST = internal.GetBnbToUsdt(gasUsed)
+					log.Println("<++++ UpdateLibrary:价格查询完成 ++++>")
+				}
+
+				dataPos := models.DataPost{
+					ID:            jobData.ID,
+					Opcode:        jobData.Opcode,
+					ContractName:  jobData.ContractName,
+					ContractAddr:  addressHex,
+					ContractHash:  txDataHashHex,
+					GasUsed:       gasUsed.Int64(),
+					GasUST:        gasUST,
+					ChainId:       jobData.ChainId,
+					CreatedAt:     jobData.CreatedAt,
+					CurrentStatus: currentStatus,
+				}
+
+				jobHandler.Repo.UpdateTask(models.UpdateTaskOne, dataPos)
+				log.Printf("<++++ UpdateLibrary:更新完成 ++++>")
 			}
-
-			gasUse := gasUsed.SetInt64(gasUsed.Int64())
-
-			//gasUsed := deploy.GoTransactionNews(client, txDataHashHex)
-			var gasUST float64
-			if gasUse.Int64() != 0 {
-				gasUST = internal.GetBnbToUsdt(gasUsed)
-				log.Println("<++++ UpdateLibrary:价格查询完成 ++++>")
-			}
-
-			dataPos := models.DataPost{
-				ID:            jobData.ID,
-				Opcode:        jobData.Opcode,
-				ContractName:  jobData.ContractName,
-				ContractAddr:  addressHex,
-				ContractHash:  txDataHashHex,
-				GasUsed:       gasUsed.Int64(),
-				GasUST:        gasUST,
-				ChainId:       jobData.ChainId,
-				CreatedAt:     jobData.CreatedAt,
-				CurrentStatus: currentStatus,
-			}
-
-			jobHandler.Repo.UpdateTask(models.UpdateTaskOne, dataPos)
-			log.Printf("<++++ UpdateLibrary:更新完成 ++++>")
 		}
 	})
 	if err != nil {
